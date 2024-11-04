@@ -21,7 +21,6 @@
 // Athena++ headers
 #include "../athena.hpp"                   // macros, enums, FaceField
 #include "../athena_arrays.hpp"            // AthenaArray
-#include "../globals.hpp"                  // Globals
 #include "../bvals/bvals_interfaces.hpp"   // BoundaryFace
 #include "../coordinates/coordinates.hpp"  // Coordinates
 #include "../eos/eos.hpp"                  // EquationOfState
@@ -44,8 +43,6 @@ void OutflowBoundary(MeshBlock *pmb, Coordinates *pcoord, AthenaArray<Real> &pri
     FaceField &bb, Real time, Real dt, int il, int iu, int jl, int ju, int kl, int ku,
     int ngh);
 Real ThetaGrid(Real x, RegionSize rs);
-void Cooling(MeshBlock *pmb, const Real time, const Real dt,
-    const AthenaArray<Real> &prim, const AthenaArray<Real> &prim_scalar, const AthenaArray<Real> &bb, AthenaArray<Real> &cons, AthenaArray<Real> &cons_scalar);
 Real HistorySum(MeshBlock *pmb, int iout);
 
 // File declarations
@@ -73,7 +70,7 @@ void VectorPotential(Real x1, Real x2, Real x3, Real *p_a_1, Real *p_a_2, Real *
 
 // File variables
 namespace {
-Real m, a, r_isco;                            // black hole parameters
+Real m, a;                                    // black hole parameters
 Real h_grid;                                  // grid compression parameter
 Real gamma_adi;                               // adiabatic index
 Real rho_min, rho_pow, pgas_min, pgas_pow;    // background parameters
@@ -94,9 +91,6 @@ Real pgas_over_rho_peak, rho_amp;             // calculated torus parameters
 Real sin_tilt, cos_tilt;                      // calculated tilt parameters
 int num_flux_radii;                           // number of spheres to use
 Real *flux_radii;                             // locations to calculate fluxes
-AthenaArray<Real> gcov, gcon;                 // metric coefficients
-AthenaArray<Real> gcov_temp, gcov_temp_alt;   // scratch covariant metric coefficients
-AthenaArray<Real> gcon_temp, gcon_temp_alt;   // scratch contravariant metric coefficients
 } // namespace
 
 //----------------------------------------------------------------------------------------
@@ -122,8 +116,6 @@ void Mesh::InitUserMeshData(ParameterInput *pin) {
   if (x2rat < 0.0) {
     h_grid = pin->GetOrAddReal("coord", "h", 1.0);
   }
-
-  r_isco = pin->GetReal("coord", "r_isco");
 
   // Read fluid parameters from input file
   gamma_adi = pin->GetReal("hydro", "gamma");
@@ -236,9 +228,6 @@ void Mesh::InitUserMeshData(ParameterInput *pin) {
   rho_amp = rho_max / std::pow(pgas_over_rho_peak, 1.0 / (gamma_adi - 1.0));
   sin_tilt = std::sin(tilt);
   cos_tilt = std::cos(tilt);
-  
-  EnrollUserExplicitSourceFunction(Cooling);
-  
   return;
 }
 
@@ -264,7 +253,6 @@ void Mesh::UserWorkAfterLoop(ParameterInput *pin) {
 //   User arrays are metric and its inverse.
 
 void MeshBlock::InitUserMeshBlockData(ParameterInput *pin) {
-
   // Allocate space for user output variables
   if (MAGNETIC_FIELDS_ENABLED) {
     AllocateUserOutputVariables(2);
@@ -279,40 +267,6 @@ void MeshBlock::InitUserMeshBlockData(ParameterInput *pin) {
   AllocateRealUserMeshBlockDataField(num_flux_radii > 0 ? 5 : 2);
   ruser_meshblock_data[0].NewAthenaArray(NMETRIC, ie + NGHOST + 1);
   ruser_meshblock_data[1].NewAthenaArray(NMETRIC, ie + NGHOST + 1);
-
-  if (lid == 0) {
-    int block_num_1 = pin->GetInteger("meshblock", "nx1");
-    int block_num_2 = pin->GetInteger("meshblock", "nx2");
-    int block_num_3 = pin->GetInteger("meshblock", "nx3");
-    // int num_blocks_this_rank = pmy_mesh->GetNumMeshBlocksThisRank(Globals::my_rank);
-    int num_blocks_this_rank = pmy_mesh->nblocal; 
-    gcov.NewAthenaArray(num_blocks_this_rank, NMETRIC, block_num_3 + NGHOST,
-                        block_num_2 + NGHOST, block_num_1 + NGHOST);
-    gcon.NewAthenaArray(num_blocks_this_rank, NMETRIC, block_num_3 + NGHOST,
-                        block_num_2 + NGHOST, block_num_1 + NGHOST);
-    gcov_temp.NewAthenaArray(num_blocks_this_rank, NMETRIC, block_num_1 + 2 * NGHOST + 1);
-    gcov_temp_alt.NewAthenaArray(num_blocks_this_rank, NMETRIC,
-                                 block_num_1 + 2 * NGHOST + 1);
-    gcon_temp.NewAthenaArray(num_blocks_this_rank, NMETRIC, block_num_1 + 2 * NGHOST + 1);
-    gcon_temp_alt.NewAthenaArray(num_blocks_this_rank, NMETRIC,
-                                 block_num_1 + 2 * NGHOST + 1);
-  }
-  // Store metric coefficients
-  AthenaArray<Real> gcov_slice, gcon_slice;
-  gcov_slice.NewAthenaArray(NMETRIC, ie + NGHOST);
-  gcon_slice.NewAthenaArray(NMETRIC, ie + NGHOST);
-  for (int k = ks; k <= ke; ++k) {
-    for (int j = js; j <= je; ++j) {
-      pcoord->CellMetric(k, j, is, ie, gcov_slice, gcon_slice);
-      for (int n = 0; n < NMETRIC; ++n) {
-        for (int i = is; i <= ie; ++i) {
-          gcov(lid,n,k,j,i) = gcov_slice(n,i);
-          gcon(lid,n,k,j,i) = gcon_slice(n,i);
-        }
-      }
-    }
-  }
-
 
   // Allocate space for history variable computation
   if (num_flux_radii > 0) {
@@ -847,8 +801,7 @@ void OutflowBoundary(MeshBlock *pmb, Coordinates *pcoord, AthenaArray<Real> &pri
       for (int i = iu + 1; i <= iu + ngh; ++i) {
         prim(IDN,k,j,i) = prim(IDN,k,j,iu);
         prim(IPR,k,j,i) = prim(IPR,k,j,iu);
-        //prim(IVX,k,j,i) = std::max(prim(IVX,k,j,iu), static_cast<Real>(0.0));
-        prim(IVX,k,j,i) = std::max(prim(IVX,k,j,iu), static_cast<Real>(0.018));
+        prim(IVX,k,j,i) = std::max(prim(IVX,k,j,iu), static_cast<Real>(0.0));
         prim(IVY,k,j,i) = prim(IVY,k,j,iu);
         prim(IVZ,k,j,i) = prim(IVZ,k,j,iu);
       }
@@ -926,98 +879,6 @@ Real ThetaGrid(Real x2, RegionSize rs) {
 
 Real HistorySum(MeshBlock *pmb, int iout) {
   return pmb->ruser_meshblock_data[4](iout/4,iout%4);
-}
-
-//----------------------------------------------------------------------------------------
-// Cooling function
-
-void Cooling(MeshBlock *pmb, const Real time, const Real dt,
-    const AthenaArray<Real> &prim, const AthenaArray<Real> &prim_scalar,
-     const AthenaArray<Real> &bb, AthenaArray<Real> &cons, AthenaArray<Real> &cons_scalar) {
-
-  // Prepare index bounds
-  int lid = pmb->lid;
-  int is = pmb->is;
-  int ie = pmb->ie;
-  int js = pmb->js;
-  int je = pmb->je;
-  int ks = pmb->ks;
-  int ke = pmb->ke;
-
-  // Go through all cells
-  for (int k = ks; k <= ke; ++k) {
-    for (int j = js; j <= je; ++j) {
-      for (int i = is; i <= ie; ++i) {
-
-        Real x = pmb->pcoord->x1v(i);
-        Real y = pmb->pcoord->x2v(j);
-        Real z = pmb->pcoord->x3v(k);
-        Real r, th, ph;
-        GetKerrSchildCoordinates(x, y, z, &r, &th, &ph);
-
-        Real uu1 = prim(IVX,k,j,i);
-        Real uu2 = prim(IVY,k,j,i);
-        Real uu3 = prim(IVZ,k,j,i);
-        Real tmp = gcov(lid,I11,k,j,i) * uu1 * uu1 + 2.0 * gcov(lid,I12,k,j,i) * uu1 * uu2
-            + 2.0 * gcov(lid,I13,k,j,i) * uu1 * uu3 + gcov(lid,I22,k,j,i) * uu2 * uu2
-            + 2.0 * gcov(lid,I23,k,j,i) * uu2 * uu3 + gcov(lid,I33,k,j,i) * uu3 * uu3;
-        Real gamma = std::sqrt(1.0 + tmp);
-
-        Real alpha = std::sqrt(-1.0 / gcon(lid,I00,k,j,i));
-        Real u0 = gamma / alpha;
-        Real u1 = uu1 - alpha * gamma * gcon(lid,I01,k,j,i);
-        Real u2 = uu2 - alpha * gamma * gcon(lid,I02,k,j,i);
-        Real u3 = uu3 - alpha * gamma * gcon(lid,I03,k,j,i);
-        Real u_0, u_1, u_2, u_3;
-        pmb->pcoord->LowerVectorCell(u0, u1, u2, u3, k, j, i, &u_0, &u_1, &u_2, &u_3);
-
-        Real b_sq = 0.0;
-        if (MAGNETIC_FIELDS_ENABLED) {
-          Real bb1 = pmb->pfield->bcc(IB1,k,j,i);
-          Real bb2 = pmb->pfield->bcc(IB2,k,j,i);
-          Real bb3 = pmb->pfield->bcc(IB3,k,j,i);
-          Real b0 = u_1 * bb1 + u_2 * bb2 + u_3 * bb3;
-          Real b1 = (bb1 + b0 * u1) / u0;
-          Real b2 = (bb2 + b0 * u2) / u0;
-          Real b3 = (bb3 + b0 * u3) / u0;
-          Real b_0, b_1, b_2, b_3;
-          pmb->pcoord->LowerVectorCell(b0, b1, b2, b3, k, j, i, &b_0, &b_1, &b_2, &b_3);
-          b_sq = b0 * b_0 + b1 * b_1 + b2 * b_2 + b3 * b_3;
-        }
-
-        Real rho = prim(IDN,k,j,i);
-        Real pgas = prim(IPR,k,j,i);
-        Real K = pgas / pow(rho, gamma_adi);
-        Real u_g = pgas/(gamma_adi-1);
-        
-        Real R = r*sin(th);
-        Real omega_k = 1./(a + pow(R,1.5));
-        
-        Real tau_cool = 2 * M_PI / omega_k ;
-        Real K_c = pgas_min / pow(rho_min, gamma_adi);
-        Real theta_nocool = 0.1;
-        Real shape_theta = exp(-1*pow((th - (M_PI/2)),2) / 2*theta_nocool*theta_nocool);
-        Real lnKkc = log(K/K_c);
-        Real U_tau = 0;
-        if(dt < tau_cool  && lnKkc > 0) {
-        U_tau = -1 * u_g * (lnKkc / tau_cool) * shape_theta ;
-        }
-        else{
-        U_tau = 0;
-        }
-        
-        if(r <= (1 + sqrt(1 - a*a))) U_tau = 0;
-        if(b_sq/rho >= 10) U_tau = 0;
-
-        // Apply cooling
-        cons(IEN,k,j,i) += U_tau * u_0;
-        cons(IM1,k,j,i) += U_tau * u_1;
-        cons(IM2,k,j,i) += U_tau * u_2;
-        cons(IM3,k,j,i) += U_tau * u_3;
-      }
-    }
-  }
-  return;
 }
 
 //----------------------------------------------------------------------------------------
