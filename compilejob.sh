@@ -3,10 +3,10 @@
 #PBS -l walltime=00:10:00
 #PBS -l mem=16gb
 #PBS -S /bin/bash
-#PBS -N athena compile job
+#PBS -N athena_compile_job
 #PBS -j oe
 #PBS -o LOG_COMPILATION
-if [ "$PBS_O_WORKDIR" ] then
+if [ "$PBS_O_WORKDIR" ]; then
     module load lib/hdf5/1.10.7-gnu-9.2
     cd $PBS_O_WORKDIR
 fi
