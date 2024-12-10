@@ -1,3 +1,6 @@
+# test sim results
+example/
+
 # Configured outputs
 Makefile
 src/defs.hpp
