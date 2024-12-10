@@ -1,0 +1,21 @@
+#!/bin/bash
+./configure.py \
+  --prob shock_tube
+make clean
+make -j
+bin/athena \
+  -i inputs/hydro/athinput.sod \
+  -d example
+
+vis/python/plot_lines.py \
+  example/Sod.block0.out1.00000.tab,,example/Sod.block0.out1.00025.tab, \
+  x1v \
+  rho,press,rho,press \
+  example/lines.png \
+  --styles=--,--,-,- \
+  --colors b,r,b,r \
+  --labels '$\rho_\mathrm{initial}$,$p_\mathrm{initial}$,$\rho_\mathrm{final}$,$p_\mathrm{final}$' \
+  --x_min=-0.5 \
+  --x_max=0.5 \
+  --x_label '$x$'
+
