@@ -27,7 +27,7 @@ run_with_lock(){
 }
 
 
-mkdir $2 &>/dev/null && echo "Created png directory" || echo "png directory already exists, overriding."
+mkdir $2 &>/dev/null && echo "Created png directory." || echo "png directory already exists, overriding."
 open_sem $n_processes
 echo "Converting athdf's to png's with $n_processes processes."
 files=($1/*.athdf)
