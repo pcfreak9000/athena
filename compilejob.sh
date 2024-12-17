@@ -6,12 +6,16 @@
 #PBS -N athena_compile_job
 #PBS -j oe
 #PBS -o LOG_COMPILATION
+
+#is this even neccessary for compilation???
+export OMP_NUM_THREADS=4
+
 if [ "$PBS_O_WORKDIR" ]; then
     cd $PBS_O_WORKDIR
     module load lib/hdf5/1.10.7-gnu-9.2
-    python configure.py -g -b --prob gr_torus --coord=kerr-schild --flux hlle --nghost 4 -hdf5 --hdf5_path=$HDF5_HOME
+    python configure.py -g -b -omp --prob gr_torus --coord=kerr-schild --flux hlle --nghost 4 -hdf5 --hdf5_path=$HDF5_HOME
 else
-    python configure.py -g -b --prob gr_torus --coord=kerr-schild --flux hlle --nghost 4 -hdf5
+    python configure.py -g -b -omp --prob gr_torus --coord=kerr-schild --flux hlle --nghost 4 -hdf5
 fi
 make clean
 make -j
