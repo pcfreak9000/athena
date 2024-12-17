@@ -1,7 +1,7 @@
 #!/bin/bash
 
 plotcommand="vis/python/plot_spherical.py"
-n_processes=6
+n_processes=28
 
 # initialize a semaphore with a given number of tokens
 open_sem(){
@@ -38,7 +38,7 @@ for filename in $1/*.athdf; do
     count=$((count + 1))
     percent=$((count * 100 / count_total))
     #echo $percent
-    printf "\rProgress: \r[%-50s] %d%%" $(head -c $((percent / 2)) < /dev/zero | tr '\0' '#') $percent
+    printf "\r[%-50s] %d%%" $(head -c $((percent / 2)) < /dev/zero | tr '\0' '#') $percent
 done #| dialog --title "Creating png's from athdf's" --gauge 'Creating pngs...' 6 60 0
 echo  
 echo "Calling ffmpeg, possibly overriding outputfile."
