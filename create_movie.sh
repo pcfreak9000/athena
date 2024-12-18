@@ -1,7 +1,7 @@
 #!/bin/bash
 
 plotcommand="vis/python/plot_spherical.py"
-n_processes=28
+n_processes=6
 
 # initialize a semaphore with a given number of tokens
 open_sem(){

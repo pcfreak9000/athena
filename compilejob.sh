@@ -18,4 +18,4 @@ else
     python configure.py -g -b -omp --prob gr_torus --coord=kerr-schild --flux hlle --nghost 4 -hdf5
 fi
 make clean
-make -j
+make -j 7
