@@ -43,8 +43,10 @@ ox2_bc = polar_wedge               # lower boundary
 nx3    = 1                  # number of cells in direction
 x3min  = -0.0314159265358979  # minimum -2*pi/200
 x3max  = 0.0314159265358979  # maximum 2*pi/200
-ix3_bc = periodic            # clockwise boundary
-ox3_bc = periodic            # counterclockwise boundary
+
+#Does not seem to have an effect on the simulation in the case of a 2D simulation
+ix3_bc = outflow            # clockwise boundary, 
+ox3_bc = outflow            # counterclockwise boundary
 
 <meshblock>
 nx1 = 20
