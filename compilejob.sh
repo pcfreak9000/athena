@@ -1,6 +1,5 @@
 #!/bin/bash
 #PBS -l nodes=1:ppn=14
-WORKER_THREADS=14
 #PBS -l walltime=00:10:00
 #PBS -l mem=16gb
 #PBS -S /bin/bash
@@ -8,6 +7,7 @@ WORKER_THREADS=14
 #PBS -j oe
 #PBS -o LOG_COMPILATION
 
+PBS_WORKER_THREADS=14
 
 ATHENA_CONFIG_FILE=athinput.master_project
 
@@ -17,7 +17,7 @@ TEMP=$(grep -F 'num_threads' $ATHENA_CONFIG_FILE)
 export OMP_NUM_THREADS=${TEMP#*=}
 
 if [ "$PBS_O_WORKDIR" ]; then
-    P9000_WORKER_THREADS=$WORKER_THREADS
+    P9000_WORKER_THREADS=$PBS_WORKER_THREADS
     cd $PBS_O_WORKDIR
     module load lib/hdf5/1.10.7-gnu-9.2
     module load mpi/openmpi/4.1-gnu-9.2-cuda-11.4
