@@ -19,8 +19,8 @@ export OMP_NUM_THREADS=${TEMP#*=}
 if [ "$PBS_O_WORKDIR" ]; then
     P9000_WORKER_THREADS=$PBS_WORKER_THREADS
     cd $PBS_O_WORKDIR
-    module load lib/hdf5/1.10.7-gnu-9.2
-    module load mpi/openmpi/3.1-gnu-9.2
+    module load lib/hdf5/1.12.0-openmpi-4.1-gnu-9.2
+    module load mpi/openmpi/4.1-gnu-9.2-cuda-11.4
     python configure.py -g -b -omp -mpi --prob gr_torus --coord=kerr-schild --flux hlle --nghost 4 -hdf5 --hdf5_path=$HDF5_HOME
 else
     python configure.py -g -b -omp --prob gr_torus --coord=kerr-schild --flux hlle --nghost 4 -hdf5

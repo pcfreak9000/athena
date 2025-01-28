@@ -1,6 +1,8 @@
 # test sim results
 example/
 
+mesh_structure.dat
+
 # Configured outputs
 Makefile
 src/defs.hpp
