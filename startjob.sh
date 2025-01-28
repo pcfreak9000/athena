@@ -7,9 +7,14 @@
 #PBS -j oe
 #PBS -o LOG_TEST
 
-export OMP_NUM_THREADS=4
+ATHENA_CONFIG_FILE=athinput.master_project
+
+export OMP_NUM_THREADS="$(grep -F \"num_threads\" $ATHENA_CONFIG_FILE | cut -d ' ' -f 3)"
+
 if [ "$PBS_O_WORKDIR" ]; then
     cd $PBS_O_WORKDIR
     module load lib/hdf5/1.10.7-gnu-9.2
-    bin/athena -i athinput.master_project -d /beegfs/work/tu_zxorf45/$(date +"%Y-%m-%d_%H-%M-%S")
+    bin/athena -i $ATHENA_CONFIG_FILE -d /beegfs/work/tu_zxorf45/$(date +"%Y-%m-%d_%H-%M-%S")
+else
+    bin/athena -i $ATHENA_CONFIG_FILE -d Gartenzwerg-$(date +"%Y-%m-%d_%H-%M-%S")
 fi
