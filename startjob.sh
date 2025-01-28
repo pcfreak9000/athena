@@ -8,4 +8,4 @@
 #PBS -o LOG_COMPILATION
 
 export OMP_NUM_THREADS=4
-bin/athena -i athinput.master_project -d /beegfs/work/tu_zxorf45/$(date +"%Y-%m-%d_%H-%M-%S")
+$PBS_O_WORKDIR/bin/athena -i athinput.master_project -d /beegfs/work/tu_zxorf45/$(date +"%Y-%m-%d_%H-%M-%S")
