@@ -9,12 +9,19 @@
 
 ATHENA_CONFIG_FILE=athinput.master_project
 
-export OMP_NUM_THREADS="$(grep -F \"num_threads\" $ATHENA_CONFIG_FILE | cut -d ' ' -f 3)"
+TEMP=$(grep -F 'num_threads' $ATHENA_CONFIG_FILE)
+export OMP_NUM_THREADS=${TEMP#*=}
 
 if [ "$PBS_O_WORKDIR" ]; then
     cd $PBS_O_WORKDIR
     module load lib/hdf5/1.10.7-gnu-9.2
-    bin/athena -i $ATHENA_CONFIG_FILE -d /beegfs/work/tu_zxorf45/$(date +"%Y-%m-%d_%H-%M-%S")
+    TARGETDIR=/beegfs/work/tu_zxorf45/$(date +"%Y-%m-%d_%H-%M-%S")
+    mkdir -p $TARGETDIR
+    cp $ATHENA_CONFIG_FILE $TARGETDIR/
+    bin/athena -i $ATHENA_CONFIG_FILE -d $TARGETDIR
 else
-    bin/athena -i $ATHENA_CONFIG_FILE -d Gartenzwerg-$(date +"%Y-%m-%d_%H-%M-%S")
+    TARGETDIR=Gartenzwerg-$(date +"%Y-%m-%d_%H-%M-%S")
+    mkdir -p $TARGETDIR
+    cp $ATHENA_CONFIG_FILE $TARGETDIR/
+    bin/athena -i $ATHENA_CONFIG_FILE -d $TARGETDIR
 fi

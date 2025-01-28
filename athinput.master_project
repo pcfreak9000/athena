@@ -21,7 +21,7 @@ dt        = 8   # time increment between outputs
 xdmf      = 0     # flag indicating whether XML auxiliary file should be output
 
 <mesh>
-num_threads = 4
+num_threads = 4 
 
 # radial coordinate in global root grid
 nx1    = 40                  # number of cells

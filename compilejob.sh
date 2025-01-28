@@ -10,8 +10,10 @@
 
 ATHENA_CONFIG_FILE=athinput.master_project
 
+
+TEMP=$(grep -F 'num_threads' $ATHENA_CONFIG_FILE)
 #is this even neccessary for compilation???
-export OMP_NUM_THREADS="$(grep -F \"num_threads\" $ATHENA_CONFIG_FILE | cut -d ' ' -f 3)"
+export OMP_NUM_THREADS=${TEMP#*=}
 
 if [ "$PBS_O_WORKDIR" ]; then
     P9000_WORKER_THREADS=14
