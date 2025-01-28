@@ -3,7 +3,7 @@ problem   = Master project
 configure = -g -b --prob gr_torus --coord=kerr-schild --flux hlle --nghost 4 -hdf5
 
 <job>
-problem_id = gartenzwerg/master_project  # problem ID: base name of output files
+problem_id = master_project  # problem ID: base name of output files
 
 <time>
 cfl_number = 0.3  # factor multiplying shortest cell crossing time
