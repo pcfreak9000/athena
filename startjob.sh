@@ -9,11 +9,14 @@
 
 ATHENA_CONFIG_FILE=athinput.master_project
 
+if [ "$PBS_O_WORKDIR" ]; then
+    cd $PBS_O_WORKDIR
+fi
+
 TEMP=$(grep -F 'num_threads' $ATHENA_CONFIG_FILE)
 export OMP_NUM_THREADS=${TEMP#*=}
 
 if [ "$PBS_O_WORKDIR" ]; then
-    cd $PBS_O_WORKDIR
     module load lib/hdf5/1.12.0-openmpi-4.1-gnu-9.2
     module load mpi/openmpi/4.1-gnu-9.2-cuda-11.4
     TARGETDIR=/beegfs/work/tu_zxorf45/$(date +"%Y-%m-%d_%H-%M-%S")
