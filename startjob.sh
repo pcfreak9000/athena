@@ -22,7 +22,7 @@ if [ "$PBS_O_WORKDIR" ]; then
     TARGETDIR=/beegfs/work/tu_zxorf45/$(date +"%Y-%m-%d_%H-%M-%S")
     mkdir -p $TARGETDIR
     cp $ATHENA_CONFIG_FILE $TARGETDIR/
-    mpirun --bind-to hwthread --map-by socket:PE="$OMP_NUM_THREADS" -report-bindings bin/athena -i $ATHENA_CONFIG_FILE -d $TARGETDIR
+    mpirun --bind-to core --map-by core -report-bindings bin/athena -i $ATHENA_CONFIG_FILE -d $TARGETDIR
 else
     TARGETDIR=Gartenzwerg-$(date +"%Y-%m-%d_%H-%M-%S")
     mkdir -p $TARGETDIR
