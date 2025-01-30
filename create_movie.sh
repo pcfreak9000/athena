@@ -44,6 +44,7 @@ echo
 echo "Calling ffmpeg, possibly overriding outputfile."
 ffmpeg -framerate $3 -pattern_type glob -i $2/'*.png' \
   -vf "pad=ceil(iw/2)*2:ceil(ih/2)*2" \
-  -c:v libx264 -pix_fmt yuv420p -y out.mp4 &>/dev/null
+  -c:v libx264 -pix_fmt yuv420p -y out.mp4 
+#&>/dev/null
 echo "Done."
 

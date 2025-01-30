@@ -1,0 +1,45 @@
+#================================================
+# FEEDBACK, job 11868116
+#================================================
+
+Job ID                                      | 11868116
+Job name                                    | athena_test_job
+Job state                                   | Completed
+TimeSubmit                                  | 2025-01-30  15:24:20
+TimeStart                                   | 2025-01-30  15:24:28
+TimeQueued                                  | 00:00:08    [elig.    00:00:08]
+WallTime                                    | 00:01:01 of 00:20:00
+Queue                                       | tiny
+Nodes:ppn                                   | 1:25
+Tasks                                       | 25
+PE, processor equivalent                    | 25.00
+Core hours                                  | 0.42        [PE hours  0.42]
+CPU load task max, 0-1.00                   | 0.00
+CPU load job avg, 0-1.00*tasks              | 0.00
+CPU efficiency, 0-100%                      | 0.00
+Memory task, MB                             | 0           [req.      2621]
+Memory job, MB                              | 0           [req.     65525]
+Scratch task-job, GB                        | 0           [job:         0]
+Host list                                   | node001:25
+#================================================
+# JOB ANALYSIS: notes, problems and solutions
+#================================================
+* NOTE:     some of the parameters are equal "0",
+            see "Memory" and "CPU load".   
+  Advice:   because of the small job's running time 
+            please ignore it.
+#================================================
+# SUPPORT info
+#================================================
+
+  Wiki:
+    http://www.bwhpc-c5.de/wiki/index.php/Category:BwForCluster_BinAC
+  Queuing system:
+    http://www.bwhpc-c5.de/wiki/index.php/BwForCluster_BinAC:_Quickstart_Guide
+  E-mail:
+    hpcmaster@uni-tuebingen.de  
+
+  Detailed information about the job:
+    checkjob -v 11868116
+    checkjob -v -v 11868116
+
