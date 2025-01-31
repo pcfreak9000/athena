@@ -1,13 +1,13 @@
 #!/bin/bash
-#PBS -l nodes=1:ppn=14
-#PBS -l walltime=00:10:00
+#PBS -l nodes=1:ppn=20
+#PBS -l walltime=00:05:00
 #PBS -l mem=16gb
 #PBS -S /bin/bash
 #PBS -N athena_compile_job
 #PBS -j oe
 #PBS -o LOG_COMPILATION
 
-PBS_WORKER_THREADS=14
+PBS_WORKER_THREADS=20
 
 ATHENA_CONFIG_FILE=athinput.master_project
 
