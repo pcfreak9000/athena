@@ -34,7 +34,7 @@ files=($1/*.athdf)
 count_total=${#files[@]}
 count=0
 for filename in $1/*.athdf; do 
-    run_with_lock $plotcommand --logc "${filename}" rho $2/$(basename ${filename}).png
+    run_with_lock $plotcommand --stream Bcc --logc "${filename}" rho $2/$(basename ${filename}).png
     count=$((count + 1))
     percent=$((count * 100 / count_total))
     #echo $percent
