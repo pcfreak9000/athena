@@ -20,7 +20,7 @@ TEMP=$(grep -F 'num_threads' $ATHENA_CONFIG_FILE)
 export OMP_NUM_THREADS=${TEMP#*=}
 
 if [ "$PBS_O_WORKDIR" ]; then
-    P9000_WORKER_THREADS=$PBS_WORKER_THREADS
+    export P9000_WORKER_THREADS=$PBS_WORKER_THREADS
     module load lib/hdf5/1.12.0-openmpi-4.1-gnu-9.2
     module load mpi/openmpi/4.1-gnu-9.2-cuda-11.4
     python configure.py -g -b -mpi --prob gr_torus --coord=kerr-schild --flux hlle --nghost 4 -hdf5 --hdf5_path=$HDF5_HOME
