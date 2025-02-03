@@ -7,13 +7,14 @@
 #PBS -j oe
 #PBS -o LOG_MOVIE
 
-ATHDFPATH=$MYWORK/2025-01-31_14-25-41
+ATHDFPATH=$MYWORK/2025-02-03_18-00-30
 
 if [ "$PBS_O_WORKDIR" ]; then
     cd $PBS_O_WORKDIR
 fi
 
 module load lib/ffmpeg/3.4.7
+#module load numlib/scipy/1.1.0-numpy-1.14.5-python-3.7.1
 
 source $HOME/miniconda3/etc/profile.d/conda.sh
 conda activate master_project_env
