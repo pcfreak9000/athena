@@ -1,7 +1,7 @@
 #!/bin/bash
 
 plotcommand="vis/python/plot_spherical.py"
-n_processes=6
+n_processes=12
 
 # initialize a semaphore with a given number of tokens
 open_sem(){
@@ -26,8 +26,8 @@ run_with_lock(){
     )&
 }
 
-
-mkdir $2 &>/dev/null && echo "Created png directory." || echo "png directory already exists, overriding."
+pwd
+mkdir $2 &>/dev/null && echo "Created png directory." || echo "png directory already exists, overriding. Or there is an error..."
 open_sem $n_processes
 echo "Converting athdf's to png's with $n_processes processes."
 files=($1/*.athdf)

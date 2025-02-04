@@ -1,5 +1,5 @@
 #!/bin/bash
-#PBS -l nodes=1:ppn=6
+#PBS -l nodes=1:ppn=12
 #PBS -l walltime=00:10:00
 #PBS -l mem=10gb
 #PBS -S /bin/bash
@@ -7,7 +7,7 @@
 #PBS -j oe
 #PBS -o LOG_MOVIE
 
-ATHDFPATH=$MYWORK/2025-02-03_18-00-30
+ATHDFPATH=$WORK/2025-02-04_16-33-16
 
 if [ "$PBS_O_WORKDIR" ]; then
     cd $PBS_O_WORKDIR
