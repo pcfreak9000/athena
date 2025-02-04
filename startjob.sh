@@ -1,17 +1,13 @@
 #!/bin/bash
-#PBS -l nodes=2:ppn=8
-#PBS -l walltime=00:20:00
-#PBS -l pmem=768mb
 #PBS -S /bin/bash
-#PBS -N athena_test_job
 #PBS -j oe
-#PBS -o LOG_TEST
 
-ATHENA_CONFIG_FILE=athinput.master_project
 
-if [ "$PBS_O_WORKDIR" ]; then
-    cd $PBS_O_WORKDIR
-fi
+
+cd $WORKDIR
+ATHENA_OUTDIR=$(pwd)/simout
+mkdir -p $ATHENA_OUTDIR
+
 
 TEMP=$(grep -F 'num_threads' $ATHENA_CONFIG_FILE)
 export OMP_NUM_THREADS=${TEMP#*=}
@@ -19,13 +15,7 @@ export OMP_NUM_THREADS=${TEMP#*=}
 if [ "$PBS_O_WORKDIR" ]; then
     module load lib/hdf5/1.12.0-openmpi-4.1-gnu-9.2
     module load mpi/openmpi/4.1-gnu-9.2-cuda-11.4
-    TARGETDIR=/beegfs/work/tu_zxorf45/$(date +"%Y-%m-%d_%H-%M-%S")
-    mkdir -p $TARGETDIR
-    cp $ATHENA_CONFIG_FILE $TARGETDIR/
-    mpirun --bind-to core --map-by core -report-bindings bin/athena -i $ATHENA_CONFIG_FILE -d $TARGETDIR
+    mpirun --bind-to core --map-by core -report-bindings $ATHENABIN -i $ATHENA_CONFIG_FILE -d $ATHENA_OUTDIR
 else
-    TARGETDIR=Gartenzwerg-$(date +"%Y-%m-%d_%H-%M-%S")
-    mkdir -p $TARGETDIR
-    cp $ATHENA_CONFIG_FILE $TARGETDIR/
-    bin/athena -i $ATHENA_CONFIG_FILE -d $TARGETDIR
+    $ATHENABIN -i $ATHENA_CONFIG_FILE -d $ATHENA_OUTDIR
 fi
