@@ -1,7 +1,7 @@
 #!/bin/bash
-#PBS -l nodes=1:ppn=4
+#PBS -l nodes=2:ppn=8
 #PBS -l walltime=00:20:00
-#PBS -l mem=16gb
+#PBS -l pmem=768mb
 #PBS -S /bin/bash
 #PBS -N athena_test_job
 #PBS -j oe
