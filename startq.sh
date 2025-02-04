@@ -9,14 +9,17 @@ if [ "$BINAC" ]; then
 else
     WORKDIR=$(pwd)/Gartenzwerg/$MYNAME
 fi
-export ATHENABIN=$(pwd)/bin/athena
+export ATHENABIN=$WORKDIR/athena
 export WORKDIR
 export ATHENA_CONFIG_FILE
+
 mkdir -p $WORKDIR
 cp $ATHENA_CONFIG_FILE $WORKDIR/
+cp startjob.sh $WORKDIR/
+cp bin/athena $WORKDIR/
 
 if [ "$BINAC" ]; then
-    qsub -q short -l walltime=00:20:00 -l nodes=2:ppn=8 -l pmem=768mb -N AthenaPP -o $WORKDIR/LOG_ATHENA -v WORKDIR=$WORKDIR -v ATHENA_CONFIG_FILE=$ATHENA_CONFIG_FILE -v ATHENABIN=$ATHENABIN startjob.sh
+    qsub -q short -l walltime=00:20:00 -l nodes=2:ppn=8 -l pmem=768mb -N AthenaPP -o $WORKDIR/LOG_ATHENA -v WORKDIR=$WORKDIR -v ATHENA_CONFIG_FILE=$ATHENA_CONFIG_FILE -v ATHENABIN=$ATHENABIN $WORKDIR/startjob.sh
 else
-    ./startjob.sh 2>&1 | tee $WORKDIR/LOG_ATHENA
+    $WORKDIR/startjob.sh 2>&1 | tee $WORKDIR/LOG_ATHENA
 fi
