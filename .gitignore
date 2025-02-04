@@ -3,6 +3,8 @@ example/
 
 mesh_structure.dat
 
+LOG_*
+
 # Configured outputs
 Makefile
 src/defs.hpp
