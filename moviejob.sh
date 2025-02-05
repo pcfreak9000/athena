@@ -1,13 +1,13 @@
 #!/bin/bash
-#PBS -l nodes=1:ppn=12
-#PBS -l walltime=00:10:00
+#PBS -l nodes=1:ppn=20
+#PBS -l walltime=00:20:00
 #PBS -l mem=10gb
 #PBS -S /bin/bash
 #PBS -N athena_movie_job
 #PBS -j oe
 #PBS -o LOG_MOVIE
 
-ATHDFPATH=$WORK/2025-02-04_19-23-43
+ATHDFPATH=$WORK/2025-02-05_16-09-25/simout
 
 if [ "$PBS_O_WORKDIR" ]; then
     cd $PBS_O_WORKDIR
