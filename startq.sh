@@ -1,6 +1,6 @@
 #!/bin/bash
 
-MYNAME=$(date +"%Y-%m-%d_%H-%M-%S")
+MYNAME=$(date +"%Y-%m-%d_%H-%M-%S")_long
 
 ATHENA_CONFIG_FILE=athinput.master_project
 
@@ -20,7 +20,7 @@ cp bin/athena $WORKDIR/
 
 
 if [ "$BINAC" ]; then
-    qsub -q short -l walltime=10:00:00 -l nodes=1:ppn=4 -l pmem=768mb -N AthenaPP14 -o $WORKDIR/LOG_ATHENA -v WORKDIR="$WORKDIR",ATHENA_CONFIG_FILE="$ATHENA_CONFIG_FILE",ATHENABIN="$ATHENABIN" $WORKDIR/startjob.sh
+    qsub -q short -l walltime=01:00:00 -l nodes=1:ppn=4 -l pmem=768mb -N AthenaPPlong -o $WORKDIR/LOG_ATHENA -v WORKDIR="$WORKDIR",ATHENA_CONFIG_FILE="$ATHENA_CONFIG_FILE",ATHENABIN="$ATHENABIN" $WORKDIR/startjob.sh
 else
     $WORKDIR/startjob.sh 2>&1 | tee $WORKDIR/LOG_ATHENA
 fi
