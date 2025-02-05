@@ -1,13 +1,29 @@
 #!/bin/bash
 #PBS -S /bin/bash
 #PBS -j oe
+#PBS -m a
 
+#bea
+
+#echo $WORKDIR
+#echo $ATHENABIN
+#echo $ATHENA_CONFIG_FILE
+
+
+if [ -z "${WORKDIR+x}" ]; then
+    exit 1
+fi
+if [ -z "${ATHENABIN+x}" ]; then
+    exit 1
+fi
+if [ -z "${ATHENA_CONFIG_FILE+x}" ]; then
+    exit 1
+fi
 
 
 cd $WORKDIR
-ATHENA_OUTDIR=$(pwd)/simout
+ATHENA_OUTDIR=$WORKDIR/simout
 mkdir -p $ATHENA_OUTDIR
-
 
 TEMP=$(grep -F 'num_threads' $ATHENA_CONFIG_FILE)
 export OMP_NUM_THREADS=${TEMP#*=}
