@@ -34,7 +34,11 @@ files=($1/*.athdf)
 count_total=${#files[@]}
 count=0
 for filename in $1/*.athdf; do 
-    run_with_lock $plotcommand --stream Bcc --logc "${filename}" rho $2/$(basename ${filename}).png
+    if [ -z "${FIELDLINES_STREAM+x}" ]; then 
+        run_with_lock $plotcommand --logc "${filename}" rho $2/$(basename ${filename}).png
+    else
+        run_with_lock $plotcommand --stream Bcc --logc "${filename}" rho $2/$(basename ${filename}).png
+    fi
     count=$((count + 1))
     percent=$((count * 100 / count_total))
     #echo $percent
@@ -44,7 +48,6 @@ echo
 echo "Calling ffmpeg, possibly overriding outputfile."
 ffmpeg -framerate $3 -pattern_type glob -i $2/'*.png' \
   -vf "pad=ceil(iw/2)*2:ceil(ih/2)*2" \
-  -c:v libx264 -pix_fmt yuv420p -y out.mp4 
-#&>/dev/null
+  -c:v libx264 -pix_fmt yuv420p -y out.mp4 2>/dev/null
 echo "Done."
 
