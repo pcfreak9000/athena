@@ -23,7 +23,7 @@ xdmf      = 0     # flag indicating whether XML auxiliary file should be output
 <output2>
 file_type = rst
 id = restart
-dt = 100000000 #never, really, except with -t option?
+dt = 100000000 #hmmmm
 
 <mesh>
 num_threads = 1
