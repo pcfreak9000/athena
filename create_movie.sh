@@ -1,6 +1,6 @@
 #!/bin/bash
 
-plotcommand="vis/python/plot_spherical.py"
+plotcommand="$5/vis/python/plot_spherical.py"
 n_processes=20
 
 # initialize a semaphore with a given number of tokens
@@ -48,6 +48,6 @@ echo
 echo "Calling ffmpeg, possibly overriding outputfile."
 ffmpeg -framerate $3 -pattern_type glob -i $2/'*.png' \
   -vf "pad=ceil(iw/2)*2:ceil(ih/2)*2" \
-  -c:v libx264 -pix_fmt yuv420p -y out.mp4 2>/dev/null
+  -c:v libx264 -pix_fmt yuv420p -y $4/out.mp4 2>/dev/null
 echo "Done."
 
