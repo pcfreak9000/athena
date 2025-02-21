@@ -54,8 +54,8 @@ ix3_bc = outflow            # clockwise boundary,
 ox3_bc = outflow            # counterclockwise boundary
 
 <meshblock>
-nx1 = 32
-nx2 = 32
+nx1 = 16
+nx2 = 16
 nx3 = 1
 
 <coord>
@@ -108,7 +108,7 @@ pot_pgas_cutoff = 1.0e-8              # amount to subtract from p_gas
 
 # additional magnetic field parameters
 pot_samples = 5       # points per edge to use if numerically integrating potential
-pot_amp     = 10.0  # overall scaling of potential
+pot_amp     = 1.0  # overall scaling of potential
 
 # perturbation parameters
 pert_amp = 0.0  # amplitude of perturbations to cylindrical radial velocity \tilde{u}^R

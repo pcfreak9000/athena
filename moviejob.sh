@@ -6,7 +6,7 @@
 #PBS -N athena_movie_job
 #PBS -j oe
 #PBS -o LOG_MOVIE
-ATHDFPATH=$WORK/2025-02-05_16-13-14/simout
+ATHDFPATH=$WORK/AthenaPP_S18_2025-02-07_15-44-31/simout
 
 if [ "$PBS_O_WORKDIR" ]; then
     cd $PBS_O_WORKDIR
