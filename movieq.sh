@@ -1,6 +1,6 @@
 #!/bin/bash
 
-MYNAME=AthenaPP_S23_
+MYNAME=AthenaPP_S18_2025-02-07_15-44-31
 
 
 if [ "$BINAC" ]; then
@@ -16,7 +16,7 @@ cp create_movie.sh $WORKDIR/
 
 
 if [ "$BINAC" ]; then
-    qsub -q tiny -l walltime=00:15:00 -l nodes=1:ppn=20 -l mem=10gb -N MOV_$MYNAME -o $WORKDIR/LOG_MOVIE -v WORKDIR="$WORKDIR",ATHENA_GIT_DIR="$ATHENA_GIT_DIR" $WORKDIR/moviejobn.sh
+    qsub -q tiny -l walltime=00:20:00 -l nodes=1:ppn=20 -l mem=10gb -N MOV_$MYNAME -o $WORKDIR/LOG_MOVIE -v WORKDIR="$WORKDIR",ATHENA_GIT_DIR="$ATHENA_GIT_DIR" $WORKDIR/moviejobn.sh
 else
     $WORKDIR/moviejobn.sh 2>&1 | tee $WORKDIR/LOG_MOVIE
 fi
