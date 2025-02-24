@@ -1,6 +1,6 @@
 #!/bin/bash
 
-MYNAME=AthenaPP_S29_$(date +"%Y-%m-%d_%H-%M-%S")
+MYNAME=AthenaPP_S28_$(date +"%Y-%m-%d_%H-%M-%S")
 
 TIMELIMIT_RSTFILE=100000:00:00
 
