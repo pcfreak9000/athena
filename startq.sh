@@ -1,6 +1,6 @@
 #!/bin/bash
 
-MYNAME=AthenaPP_U_$(date +"%Y-%m-%d_%H-%M-%S")
+MYNAME=AthenaPP_S27_$(date +"%Y-%m-%d_%H-%M-%S")
 
 TIMELIMIT_RSTFILE=100000:00:00
 
@@ -23,7 +23,7 @@ cp bin/athena $WORKDIR/
 
 
 if [ "$BINAC" ]; then
-    qsub -q tiny -l walltime=00:20:00 -l nodes=1:ppn=8 -l pmem=768mb -N $MYNAME -o $WORKDIR/LOG_ATHENA -v WORKDIR="$WORKDIR",ATHENA_CONFIG_FILE="$ATHENA_CONFIG_FILE",ATHENABIN="$ATHENABIN",TIMELIMIT_RSTFILE="$TIMELIMIT_RSTFILE" $WORKDIR/startjob.sh
+    qsub -q short -l walltime=12:00:00 -l nodes=8:ppn=20 -l pmem=768mb -N $MYNAME -o $WORKDIR/LOG_ATHENA -v WORKDIR="$WORKDIR",ATHENA_CONFIG_FILE="$ATHENA_CONFIG_FILE",ATHENABIN="$ATHENABIN",TIMELIMIT_RSTFILE="$TIMELIMIT_RSTFILE" $WORKDIR/startjob.sh
 else
     $WORKDIR/startjob.sh 2>&1 | tee $WORKDIR/LOG_ATHENA
 fi
