@@ -55,8 +55,8 @@ ix3_bc = outflow            # clockwise boundary,
 ox3_bc = outflow            # counterclockwise boundary
 
 <meshblock>
-nx1 = 32
-nx2 = 32
+nx1 = 16
+nx2 = 16
 nx3 = 1
 
 <refinement1>
