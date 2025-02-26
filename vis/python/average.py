@@ -51,6 +51,7 @@ def main(**kwargs):
     with h5py.File(files[0], 'r') as f:
         attributes = f.attrs.items()
         attrs = dict(attributes)
+        print(f['x1f'].shape)
         #ll = f['LogicalLocations'][:]
     with h5py.File(outfile, 'w') as f:
         for k,v in attrs.items():
@@ -76,11 +77,11 @@ def main(**kwargs):
         for dataset_name, num_vars in zip(
             f.attrs['DatasetNames'], f.attrs['NumVariables']):
             f.create_dataset(dataset_name.decode('ascii', 'replace'), dtype='>f4',
-                    shape=(num_vars, 1, nx3, nx2, nx1))
+                    shape=(num_vars, basedata.shape[0], basedata.shape[1], basedata.shape[2], basedata.shape[3]))
             for var_num in range(num_vars):
                 variable_name = f.attrs['VariableNames'][var_num + var_offset]
                 variable_name = variable_name.decode('ascii', 'replace')
-                f[dataset_name][var_num, 0, :, :, :] = basedata[variable_name]
+                f[dataset_name][var_num, :, :, :, :] = basedata[variable_name]
             var_offset += num_vars
 
 
