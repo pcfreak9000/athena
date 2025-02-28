@@ -73,6 +73,7 @@ void VectorPotential(Real x1, Real x2, Real x3, Real *p_a_1, Real *p_a_2, Real *
 
 // File variables
 namespace {
+Real theta_nocool;                            // Cooling function parameter
 Real m, a, r_isco;                            // black hole parameters
 Real h_grid;                                  // grid compression parameter
 Real gamma_adi;                               // adiabatic index
@@ -124,6 +125,8 @@ void Mesh::InitUserMeshData(ParameterInput *pin) {
   }
 
   r_isco = pin->GetReal("coord", "r_isco");
+
+  theta_nocool = pin->GetReal("problem", "theta_nocool");
 
   // Read fluid parameters from input file
   gamma_adi = pin->GetReal("hydro", "gamma");
@@ -995,15 +998,15 @@ void Cooling(MeshBlock *pmb, const Real time, const Real dt,
         
         Real tau_cool = 2 * M_PI / omega_k ;
         Real K_c = pgas_min / pow(rho_min, gamma_adi);
-        Real theta_nocool = 0.1;
-        Real shape_theta = exp(-1*pow((th - (M_PI/2)),2) / 2*theta_nocool*theta_nocool);
+
+        Real shape_theta = exp(-1*pow((th - (M_PI/2)),2) / (2*theta_nocool*theta_nocool));
         Real lnKkc = log(K/K_c);
         Real U_tau = 0;
         if(dt < tau_cool  && lnKkc > 0) {
-        U_tau = -1 * u_g * (lnKkc / tau_cool) * shape_theta ;
+          U_tau = -1 * u_g * (lnKkc / tau_cool) * shape_theta;
         }
         else{
-        U_tau = 0;
+          U_tau = 0;
         }
         
         if(r <= (1 + sqrt(1 - a*a))) U_tau = 0;
