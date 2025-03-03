@@ -124,7 +124,10 @@ void Mesh::InitUserMeshData(ParameterInput *pin) {
     h_grid = pin->GetOrAddReal("coord", "h", 1.0);
   }
 
-  r_isco = pin->GetReal("coord", "r_isco");
+
+  
+
+  
 
   theta_nocool = pin->GetReal("problem", "theta_nocool");
 
@@ -133,6 +136,20 @@ void Mesh::InitUserMeshData(ParameterInput *pin) {
 
   // Read torus parameters from input file
   prograde = pin->GetBoolean("problem", "prograde");
+
+
+  // r_isco = pin->GetReal("coord", "r_isco");
+  // is now instead calculated using the formula from https://duetosymmetry.com/tool/kerr-calculator-v2/
+  Real z1 = 1.0 + std::cbrt(1.0 - SQR(a)) * (std::cbrt(1.0 + a) + std::cbrt(1.0 - a));
+  Real z2 = std::sqrt(3.0 * SQR(a) + SQR(z1));
+  Real zz = std::sqrt((3.0 - z1) * (3.0 + z1 + 2.0 * z2));
+  if (prograde) {
+    r_isco = 3.0 + z2 - zz;
+  } else {
+    r_isco = 3.0 + z2 + zz;
+  }
+  std::cout << "r_isco: " << r_isco << std::endl;
+  
   r_edge = pin->GetReal("problem", "r_edge");
   r_peak = pin->GetReal("problem", "r_peak");
   if (r_peak < 0.0) {
@@ -270,12 +287,20 @@ void MeshBlock::InitUserMeshBlockData(ParameterInput *pin) {
 
   // Allocate space for user output variables
   if (MAGNETIC_FIELDS_ENABLED) {
-    AllocateUserOutputVariables(2);
+    AllocateUserOutputVariables(2+4);
     SetUserOutputVariableName(0, "gamma");
     SetUserOutputVariableName(1, "pmag");
+    SetUserOutputVariableName(2, "u0");
+    SetUserOutputVariableName(3, "u1");
+    SetUserOutputVariableName(4, "u2");
+    SetUserOutputVariableName(5, "u3");
   } else {
-    AllocateUserOutputVariables(1);
+    AllocateUserOutputVariables(1+4);
     SetUserOutputVariableName(0, "gamma");
+    SetUserOutputVariableName(1, "u0");
+    SetUserOutputVariableName(2, "u1");
+    SetUserOutputVariableName(3, "u2");
+    SetUserOutputVariableName(4, "u3");
   }
 
   // Allocate space for scratch arrays
@@ -702,6 +727,12 @@ void MeshBlock::UserWorkBeforeOutput(ParameterInput *pin) {
         Real u_0, u_1, u_2, u_3;
         pcoord->LowerVectorCell(u0, u1, u2, u3, k, j, i, &u_0, &u_1, &u_2, &u_3);
 
+        int offset = MAGNETIC_FIELDS_ENABLED ? 0 : -1;
+        user_out_var(2+offset,k,j,i) = u0;
+        user_out_var(3+offset,k,j,i) = u1;
+        user_out_var(4+offset,k,j,i) = u2;
+        user_out_var(5+offset,k,j,i) = u3;
+
         // Calculate 4-magnetic field
         Real bb1 = 0.0, bb2 = 0.0, bb3 = 0.0;
         Real b0 = 0.0, b1 = 0.0, b2 = 0.0, b3 = 0.0;
@@ -999,8 +1030,9 @@ void Cooling(MeshBlock *pmb, const Real time, const Real dt,
         Real tau_cool = 2 * M_PI / omega_k ;
         Real K_c = pgas_min / pow(rho_min, gamma_adi);
 
-        Real shape_theta = exp(-1*pow((th - (M_PI/2)),2) / (2*theta_nocool*theta_nocool));
-        Real lnKkc = log(K/K_c);
+        //Real shape_theta = exp(-1*pow((th - (M_PI/2)),2) / (2*theta_nocool*theta_nocool));
+        Real shape_theta = exp(-1*SQR(th - (M_PI/2.0)) / (2.0 * SQR(theta_nocool)));
+        Real lnKkc = log(K / K_c);
         Real U_tau = 0;
         if(dt < tau_cool  && lnKkc > 0) {
           U_tau = -1 * u_g * (lnKkc / tau_cool) * shape_theta;
@@ -1008,7 +1040,7 @@ void Cooling(MeshBlock *pmb, const Real time, const Real dt,
         else{
           U_tau = 0;
         }
-        
+        //What are these conditions? Especially the second, with the hardcoded 10???
         if(r <= (1 + sqrt(1 - a*a))) U_tau = 0;
         if(b_sq/rho >= 10) U_tau = 0;
 
