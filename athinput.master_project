@@ -107,7 +107,6 @@ beta_min  = 0.001               # minimum allowed value of p_gas/p_mag
 <problem>
 
 # torus parameters
-theta_nocool = 0.1
 prograde   = true    # flag indicating disk is prograde
 r_edge     = 45.0     # radius of inner edge of disk
 r_peak     = 60.0    # radius of pressure maximum; use l instead if negative
