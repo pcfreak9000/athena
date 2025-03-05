@@ -140,8 +140,8 @@ void Mesh::InitUserMeshData(ParameterInput *pin) {
 
   // r_isco = pin->GetReal("coord", "r_isco");
   // is now instead calculated using the formula from https://duetosymmetry.com/tool/kerr-calculator-v2/
-  Real z1 = 1.0 + std::cbrt(1.0 - SQR(a)) * (std::cbrt(1.0 + a) + std::cbrt(1.0 - a));
-  Real z2 = std::sqrt(3.0 * SQR(a) + SQR(z1));
+  Real z1 = 1.0 + std::cbrt(1.0 - SQR(a/m)) * (std::cbrt(1.0 + a/m) + std::cbrt(1.0 - a/m));
+  Real z2 = std::sqrt(3.0 * SQR(a/m) + SQR(z1));
   Real zz = std::sqrt((3.0 - z1) * (3.0 + z1 + 2.0 * z2));
   if (prograde) {
     r_isco = 3.0 + z2 - zz;
