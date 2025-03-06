@@ -1,6 +1,6 @@
 #!/bin/bash
 
-MYNAME=AthenaPP_S31_2025-03-04_14-33-00
+MYNAME=AthenaPP_S32_2025-03-04_16-37-56
 
 
 if [ "$BINAC" ]; then
