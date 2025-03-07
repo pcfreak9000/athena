@@ -5,6 +5,7 @@ import argparse
 import athena_read
 
 import math
+import csv
 
 kappa = 0.4 #in cgs
 dist_geom_cgs = 100.0 #conversion factor from geometric units distance to centimeters
@@ -27,24 +28,50 @@ def getFromBorderIndex(array, indexTauGrOne):
 
 def main(**kwargs):
     input_filename = kwargs['input_filename']
+    output_filename = kwargs['output_filename']
+    
     data = athena_read.athdf(input_filename)
     rho = data['rho'] 
     rcoords = data['x1v']
     thcoords = data['x2v']
     thbord = data['x2f']
+    du0 = data['u0']
+    du1 = data['u1']
+    du2 = data['u2']
+    du3 = data['u3']
     heights = []
     densities = []
+    u0 = []
+    u1 = []
+    u2 = []
+    u3 = []
     for rInd in range(0, rcoords.shape[0]):
         thtop = getThetaTop(rInd, rho, rcoords, thcoords, thbord)
         # heights in geometric units
         if thtop == -1:
             heights.append(0.0)
             densities.append(0.0)
+            u0.append(0.0)
+            u1.append(0.0)
+            u2.append(0.0)
+            u3.append(0.0)
         else:
             heights.append(rcoords[rInd]*math.cos(getFromBorderIndex(thcoords, thtop)))
             densities.append(getFromBorderIndex(rho[0, :, rInd], thtop))
-    print(densities)
+            u0.append(getFromBorderIndex(du0[0, :, rInd], thtop))
+            u1.append(getFromBorderIndex(du1[0, :, rInd], thtop))
+            u2.append(getFromBorderIndex(du2[0, :, rInd], thtop))
+            u3.append(getFromBorderIndex(du3[0, :, rInd], thtop))
 
+    lis = [rcoords, heights, densities, u0, u1, u2, u3]
+    zl = zip(*lis)
+    with open(output_filename, 'w', newline='') as csvfile:
+        writer = csv.writer(csvfile, delimiter=' ',
+                            quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        writer.writerow(['radius', 'height', 'density', 'u0', 'u1', 'u2', 'u3'])
+        for t in zl:
+            writer.writerow(t)
+        
 # Execute main function
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
