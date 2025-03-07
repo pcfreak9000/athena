@@ -23,7 +23,7 @@ cp bin/athena $WORKDIR/
 
 
 if [ "$BINAC" ]; then
-    qsub -q short -l walltime=04:00:00 -l nodes=10:ppn=22 -l pmem=768mb -N $MYNAME -o $WORKDIR/LOG_ATHENA -v WORKDIR="$WORKDIR",ATHENA_CONFIG_FILE="$ATHENA_CONFIG_FILE",ATHENABIN="$ATHENABIN",TIMELIMIT_RSTFILE="$TIMELIMIT_RSTFILE" $WORKDIR/startjob.sh
+    qsub -q short -l walltime=04:00:00 -l nodes=14:ppn=14 -l pmem=768mb -N $MYNAME -o $WORKDIR/LOG_ATHENA -v WORKDIR="$WORKDIR",ATHENA_CONFIG_FILE="$ATHENA_CONFIG_FILE",ATHENABIN="$ATHENABIN",TIMELIMIT_RSTFILE="$TIMELIMIT_RSTFILE" $WORKDIR/startjob.sh
 else
     $WORKDIR/startjob.sh 2>&1 | tee $WORKDIR/LOG_ATHENA
 fi
