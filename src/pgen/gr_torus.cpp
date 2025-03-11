@@ -148,6 +148,7 @@ void Mesh::InitUserMeshData(ParameterInput *pin) {
   } else {
     r_isco = 3.0 + z2 + zz;
   }
+  r_isco *= m;
   std::cout << "r_isco: " << r_isco << std::endl;
   
   r_edge = pin->GetReal("problem", "r_edge");
