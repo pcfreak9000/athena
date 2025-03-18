@@ -39,7 +39,8 @@ def main(**kwargs):
     du1 = data['u1']
     du2 = data['u2']
     du3 = data['u3']
-    heights = []
+    xs = []
+    ys = []
     densities = []
     u0 = []
     u1 = []
@@ -49,26 +50,29 @@ def main(**kwargs):
         thtop = getThetaTop(rInd, rho, rcoords, thcoords, thbord)
         # heights in geometric units
         if thtop == -1:
-            heights.append(0.0)
+            xs.append(rcoords[rInd])
+            ys.append(0.0)
             densities.append(0.0)
             u0.append(0.0)
             u1.append(0.0)
             u2.append(0.0)
             u3.append(0.0)
         else:
-            heights.append(rcoords[rInd]*math.cos(getFromBorderIndex(thcoords, thtop)))
+            xs.append(rcoords[rInd]*math.sin(getFromBorderIndex(thcoords, thtop)))
+            ys.append(rcoords[rInd]*math.cos(getFromBorderIndex(thcoords, thtop)))
             densities.append(getFromBorderIndex(rho[0, :, rInd], thtop))
             u0.append(getFromBorderIndex(du0[0, :, rInd], thtop))
             u1.append(getFromBorderIndex(du1[0, :, rInd], thtop))
             u2.append(getFromBorderIndex(du2[0, :, rInd], thtop))
             u3.append(getFromBorderIndex(du3[0, :, rInd], thtop))
 
-    lis = [rcoords, heights, densities, u0, u1, u2, u3]
+    #lis = [rcoords, heights, densities, u0, u1, u2, u3]
+    lis = [xs, ys, densities, u0, u1, u2, u3]
     zl = zip(*lis)
     with open(output_filename, 'w', newline='') as csvfile:
         writer = csv.writer(csvfile, delimiter=' ',
                             quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        writer.writerow(['radius', 'height', 'density', 'u0', 'u1', 'u2', 'u3'])
+        writer.writerow(['x', 'y', 'density', 'u0', 'u1', 'u2', 'u3'])
         for t in zl:
             writer.writerow(t)
         
