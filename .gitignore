@@ -1,6 +1,9 @@
 # test sim results
 example/
 Gartenzwerg/
+src/.cproject
+src/.project
+src/.settings/
 
 mesh_structure.dat
 
