@@ -1,7 +1,7 @@
 #!/bin/bash
 #PBS -S /bin/bash
 #PBS -j oe
-#PBS -m a
+#PBS -m ae
 
 #bea
 

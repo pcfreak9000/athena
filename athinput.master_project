@@ -8,7 +8,7 @@ problem_id = master_project  # problem ID: base name of output files
 <time>
 cfl_number = 0.3  # factor multiplying shortest cell crossing time
 nlim       = -1   # maximum simulation steps
-tlim       = 2000  # maximum simulation time
+tlim       = 60000  # maximum simulation time
 integrator = rk4  # time integration algorithm
 xorder     = 3    # order of spatial reconstruction
 ncycle_out = 400    # interval for stdout summary info
