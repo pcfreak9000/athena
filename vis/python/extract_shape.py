@@ -8,7 +8,13 @@ import math
 import csv
 
 kappa = 0.4 #in cgs
-dist_geom_cgs = 100.0 #conversion factor from geometric units distance to centimeters
+solar_mass_si = 1.988e30
+bh_mass_si = 5.0*solar_mass_si #in SI in kg
+g_si = 6.674e-11 #grav. constant in SI
+c_si = 2.998e8 #speed of light in SI
+dist_si_cgs = 100.0 #conversion factor from SI meters to cgs centimeters
+
+dist_geom_cgs = g_si/(c_si*c_si)*bh_mass_si*dist_si_cgs #conversion factor from geometric units distance to centimeters
 
 def getThetaTop(radiusInd, rho, rcoords, thcoords, thbord):
     tau = 0.0
