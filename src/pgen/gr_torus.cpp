@@ -57,6 +57,8 @@ void GetBoyerLindquistCoordinates(Real x1, Real x2, Real x3, Real *p_r, Real *p_
 void TransformContravariantFromBoyerLindquist(Real at_bl, Real ar_bl, Real ath_bl,
     Real aph_bl, Real x1, Real x2, Real x3, Real *p_a0, Real *p_a1, Real *p_a2,
     Real *p_a3);
+void TransformContravariantToBoyerLindquist(Real p_a0, Real p_a1, Real p_a2, Real p_a3, Real x1, Real x2, Real x3, Real *at_bl, Real *ar_bl, Real *ath_bl,
+    Real *aph_bl);
 void TransformCovariantFromKerrSchild(Real a_r, Real a_th, Real a_ph, Real x1, Real x2,
     Real x3, Real *p_a_1, Real *p_a_2, Real *p_a_3);
 Real CalculateLFromRPeak(Real r);
@@ -698,6 +700,7 @@ void MeshBlock::UserWorkInLoop() {
 //   Writes to user_out_var array the following quantities:
 //     0,k,j,i: gamma (normal-frame Lorentz factor)
 //     1,k,j,i: pmag (fluid-frame magnetic pressure, if magnetic fields enabled)
+//     2..5,k,j,i: contravariant 4-velocity in boyer-lindquist coordinates (1..4 if not magnetic fields enabled)
 
 void MeshBlock::UserWorkBeforeOutput(ParameterInput *pin) {
   // Prepare scratch arrays
@@ -709,6 +712,11 @@ void MeshBlock::UserWorkBeforeOutput(ParameterInput *pin) {
     for (int j = js; j <= je; ++j) {
       pcoord->CellMetric(k, j, is, ie, g, gi);
       for (int i = is; i <= ie; ++i) {
+        // Extract preferred coordinates of cell
+        Real x1 = pcoord->x1v(i);
+        Real x2 = pcoord->x2v(j);
+        Real x3 = pcoord->x3v(k);
+
         // Calculate normal-frame Lorentz factor
         Real uu1 = phydro->w(IVX,k,j,i);
         Real uu2 = phydro->w(IVY,k,j,i);
@@ -728,11 +736,14 @@ void MeshBlock::UserWorkBeforeOutput(ParameterInput *pin) {
         Real u_0, u_1, u_2, u_3;
         pcoord->LowerVectorCell(u0, u1, u2, u3, k, j, i, &u_0, &u_1, &u_2, &u_3);
 
+        Real u0_bl, u1_bl, u2_bl, u3_bl;
+        TransformContravariantToBoyerLindquist(u0, u1, u2, u3, x1, x2, x3, &u0_bl, &u1_bl, &u2_bl, &u3_bl);
+
         int offset = MAGNETIC_FIELDS_ENABLED ? 0 : -1;
-        user_out_var(2+offset,k,j,i) = u0;
-        user_out_var(3+offset,k,j,i) = u1;
-        user_out_var(4+offset,k,j,i) = u2;
-        user_out_var(5+offset,k,j,i) = u3;
+        user_out_var(2+offset,k,j,i) = u0_bl;
+        user_out_var(3+offset,k,j,i) = u1_bl;
+        user_out_var(4+offset,k,j,i) = u2_bl;
+        user_out_var(5+offset,k,j,i) = u3_bl;
 
         // Calculate 4-magnetic field
         Real bb1 = 0.0, bb2 = 0.0, bb3 = 0.0;
@@ -1129,6 +1140,25 @@ void TransformContravariantFromBoyerLindquist(Real at_bl, Real ar_bl, Real ath_b
     *p_a1 = NAN;
     *p_a2 = NAN;
     *p_a3 = NAN;
+  }
+  return;
+}
+} // namespace
+
+namespace {
+void TransformContravariantToBoyerLindquist(Real p_a0, Real p_a1, Real p_a2, Real p_a3, Real x1, Real x2, Real x3, Real *at_bl, Real *ar_bl, Real *ath_bl,
+    Real *aph_bl) {
+  if (std::strcmp(COORDINATE_SYSTEM, "kerr-schild") == 0) {
+    Real delta = SQR(x1) - 2.0 * m * x1 + SQR(a);
+    *at_bl = p_a0 - 2.0 * m * x1 / delta * p_a1;
+    *ar_bl = p_a1;
+    *ath_bl = p_a2;
+    *aph_bl = p_a3 - a / delta * p_a1;
+  } else {
+    *at_bl = NAN;
+    *ar_bl = NAN;
+    *ath_bl = NAN;
+    *aph_bl = NAN;
   }
   return;
 }
