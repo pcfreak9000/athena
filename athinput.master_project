@@ -89,7 +89,7 @@ level = 1
 
 <coord>
 m = 1.0  # black hole mass M
-a = 0.997  # black hole spin a (0 <= a < M)
+a = 0.0  # black hole spin a (0 <= a < M)
 h = 1.0  # grid compression parameter
 #r_isco = 6.0 # is now calculated in the code
 
