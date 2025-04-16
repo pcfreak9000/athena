@@ -11,7 +11,7 @@ fi
 export WORKDIR
 export ATHENA_GIT_DIR=$(pwd)
 
-cp moviejobn.sh $WORKDIR/
+cp moviejob.sh $WORKDIR/
 cp create_movie.sh $WORKDIR/
 
 
