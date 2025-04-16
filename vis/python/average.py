@@ -21,17 +21,17 @@ import athena_read
 
 
 def main(**kwargs):
-
+    if kwargs['end'] < kwargs['start']:
+        raise Exception("end < start")
     # Determine which files to process given possible MPI information
+    # yes, start+1 is correct. start itself is read below.
     file_nums = range(kwargs['start']+1, kwargs['end']+1, kwargs['stride'])
     file_nums_local = file_nums
-
     level_max = 0
     for n in file_nums_local:
         input_filename = '{0}.{1:05d}.athdf'.format(kwargs['input_filename'], n)
         with h5py.File(input_filename, 'r') as f:
             level_max = max(level_max, f.attrs['MaxLevel'])
-
     
     input_filename = '{0}.{1:05d}.athdf'.format(kwargs['input_filename'], kwargs['start'])
     output_filename = kwargs['output_filename']
@@ -48,7 +48,7 @@ def main(**kwargs):
     basedata = athena_read.athdf(input_filename, quantities=kwargs['quantities'],
                                  level=level_max, subsample=False)
 
-    
+
     # Go through list of files
     count = 1
     for n in file_nums_local:
@@ -57,11 +57,9 @@ def main(**kwargs):
         input_filename = '{0}.{1:05d}.athdf'.format(kwargs['input_filename'], n)
         data = athena_read.athdf(input_filename, quantities=kwargs['quantities'],
                                  level=level_max, subsample=False)
-
         for datasetName in toavg:
             shape = data[datasetName].shape
             #print(shape)
-            
             for i in range(shape[0]):
                 for j in range(shape[1]):
                     for k in range(shape[2]):

@@ -35,7 +35,7 @@ count_total=${#files[@]}
 count=0
 for filename in $1/*.athdf; do 
     if [ -z "${FIELDLINES_STREAM+x}" ]; then 
-        run_with_lock $plotcommand --logc "${filename}" rho $2/$(basename ${filename}).png
+        run_with_lock $plotcommand "${filename}" rho $2/$(basename ${filename}).png
     else
         run_with_lock $plotcommand --stream Bcc --logc "${filename}" rho $2/$(basename ${filename}).png
     fi
