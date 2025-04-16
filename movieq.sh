@@ -16,7 +16,7 @@ cp create_movie.sh $WORKDIR/
 
 
 if [ "$BINAC" ]; then
-    qsub -q tiny -l walltime=00:20:00 -l nodes=1:ppn=24 -l mem=12gb -N MOV_$MYNAME -o $WORKDIR/LOG_MOVIE -v WORKDIR="$WORKDIR",ATHENA_GIT_DIR="$ATHENA_GIT_DIR" $WORKDIR/moviejobn.sh
+    qsub -q tiny -l walltime=00:20:00 -l nodes=1:ppn=24 -l mem=12gb -N MOV_$MYNAME -o $WORKDIR/LOG_MOVIE -v WORKDIR="$WORKDIR",ATHENA_GIT_DIR="$ATHENA_GIT_DIR" $WORKDIR/moviejob.sh
 else
-    $WORKDIR/moviejobn.sh 2>&1 | tee $WORKDIR/LOG_MOVIE
+    $WORKDIR/moviejob.sh 2>&1 | tee $WORKDIR/LOG_MOVIE
 fi
