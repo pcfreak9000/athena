@@ -1,12 +1,12 @@
 #!/bin/bash
 
-ath_git_dir=$5
-athdf_dir=$1
-png_dir=$2
-fps=$3
-file_out=$4
-args=$6
-hideprogress=$7
+ath_git_dir="$5"
+athdf_dir="$1"
+png_dir="$2"
+fps="$3"
+file_out="$4"
+args="$6"
+hideprogress="$7"
 
 plotcommand="$ath_git_dir/vis/python/plot_spherical.py"
 n_processes=${P9000_WORKER_THREADS:-4}
