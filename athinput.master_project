@@ -51,8 +51,8 @@ x3min  = -0.0314159265358979  # minimum -2*pi/200
 x3max  = 0.0314159265358979  # maximum 2*pi/200
 
 #Does not seem to have an effect on the simulation in the case of a 2D simulation
-ix3_bc = outflow            # clockwise boundary, 
-ox3_bc = outflow            # counterclockwise boundary
+ix3_bc = none            # clockwise boundary, 
+ox3_bc = none            # counterclockwise boundary
 
 <meshblock>
 nx1 = 16
