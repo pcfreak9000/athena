@@ -1,7 +1,7 @@
 #!/bin/bash
-#PBS -l nodes=1:ppn=20
+#PBS -l nodes=1:ppn=4
 #PBS -l walltime=00:05:00
-#PBS -l mem=16gb
+#PBS -l mem=1gb
 #PBS -q tiny
 #PBS -S /bin/bash
 #PBS -N athena_compile_job
@@ -22,9 +22,13 @@ export OMP_NUM_THREADS=${TEMP#*=}
 
 if [ "$PBS_O_WORKDIR" ]; then
     export P9000_WORKER_THREADS=$PBS_WORKER_THREADS
-    module load lib/hdf5/1.12.0-openmpi-4.1-gnu-9.2
-    module load mpi/openmpi/4.1-gnu-9.2-cuda-11.4
-    python configure.py -g -b -mpi --prob gr_torus --coord=kerr-schild --flux hlle --nghost 4 -hdf5 --hdf5_path="$HDF5_HOME"
+    module load compiler/gnu/14.2
+    source "$HOME"/miniconda3/etc/profile.d/conda.sh
+    conda activate sim_env
+    #module load lib/hdf5/1.12.0-openmpi-4.1-gnu-12.2-cuda-11.4
+    #module load mpi/openmpi/4.1-gnu-9.2-cuda-11.4
+    python configure.py -g -b -mpi --prob gr_torus --coord=kerr-schild --flux hlle --nghost 4 -hdf5 --hdf5_path=$HOME/miniconda3/envs/sim_env
+#--hdf5_path="$HDF5_HOME"
 else
     python configure.py -g -b -omp --prob gr_torus --coord=kerr-schild --flux hlle --nghost 4 -hdf5
 fi

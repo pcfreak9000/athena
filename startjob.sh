@@ -32,8 +32,10 @@ TEMP=$(grep -F 'num_threads' "$ATHENA_CONFIG_FILE")
 export OMP_NUM_THREADS=${TEMP#*=}
 
 if [ "$PBS_O_WORKDIR" ]; then
-    module load lib/hdf5/1.12.0-openmpi-4.1-gnu-9.2
-    module load mpi/openmpi/4.1-gnu-9.2-cuda-11.4
+    source "$HOME"/miniconda3/etc/profile.d/conda.sh
+    conda activate sim_env
+    #module load lib/hdf5/1.12.0-openmpi-4.1-gnu-12.2-cuda-11.4
+    #module load mpi/openmpi/4.1-gnu-9.2-cuda-11.4
     mpirun --bind-to core --map-by core -report-bindings "$ATHENABIN" -i "$ATHENA_CONFIG_FILE" -d "$ATHENA_OUTDIR" -t "$TIMELIMIT_RSTFILE"
 else
     "$ATHENABIN" -i "$ATHENA_CONFIG_FILE" -d "$ATHENA_OUTDIR" -t "$TIMELIMIT_RSTFILE"
