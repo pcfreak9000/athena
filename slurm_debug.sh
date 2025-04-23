@@ -1,0 +1,7 @@
+echo "tasks avail: $SLURM_NTASKS"
+echo "cpu per task: $SLURM_CPUS_PER_TASK"
+echo "tasks count (mpi ranks): $SLURM_STEP_NUM_TASKS"
+echo "cpu per node: $SLURM_JOB_CPUS_PER_NODE"
+echo "processes: $SLURM_NPROCS"
+echo "nodes: $SLURM_JOB_NUM_NODES"
+echo "p9: ${P9000_WORKER_THREADS:-4}"
