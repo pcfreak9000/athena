@@ -33,7 +33,7 @@ cp bin/athena "$WORKDIR"/
 
 
 if [ "$BINAC2" ]; then
-    sbatch --partition compute -t $wt -N $nodes --ntasks-per-node=$ppn --cpus-per-task 2 --mem-per-cpu=1gb -J "$MYNAME" --output="$WORKDIR"/LOG_ATHENA --error="$WORKDIR"/LOG_ATHENA --export=ALL "$WORKDIR"/startjob2.sh
+    sbatch --constraint=ib --partition compute -t $wt -N $nodes --ntasks-per-node=$ppn --cpus-per-task 2 --mem-per-cpu=1gb -J "$MYNAME" --output="$WORKDIR"/LOG_ATHENA --error="$WORKDIR"/LOG_ATHENA --export=ALL "$WORKDIR"/startjob2.sh
 else
     "$WORKDIR"/startjob2.sh 2>&1 | tee "$WORKDIR"/LOG_ATHENA
 fi
