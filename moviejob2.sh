@@ -1,9 +1,6 @@
 #!/bin/bash
-#PBS -S /bin/bash
-#PBS -j oe
-#PBS -m a
 
-export P9000_WORKER_THREADS=$PBS_NP
+export P9000_WORKER_THREADS=$SLURM_JOB_CPUS_PER_NODE
 
 ATHDF_DIR="$WORKDIR"/simout
 
