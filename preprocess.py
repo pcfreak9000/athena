@@ -10,7 +10,7 @@ output_file_path = "athinput.pp_master_project"
 time = 1e4
 outputdt = 10
 mass = 1.0
-spin = 0.998
+spin = 0.0
 
 
 

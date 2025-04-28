@@ -5,6 +5,9 @@ src/.cproject
 src/.project
 src/.settings/
 
+#output of preprocess.py
+athinput.pp_master_project
+
 mesh_structure.dat
 
 LOG_*
