@@ -4,6 +4,12 @@ wt="$2"
 nodes="$3"
 ppn="$4"
 
+if [ -z "${5+x}" ]; then
+    ATHENA_CONFIG_FILE=athinput.master_project
+else
+    ATHENA_CONFIG_FILE=$5
+fi
+
 MYNAME="$1"_$(date +"%Y-%m-%d_%H-%M-%S")
 
 #echo $MYNAME
@@ -13,8 +19,6 @@ MYNAME="$1"_$(date +"%Y-%m-%d_%H-%M-%S")
 #echo $ppn
 
 TIMELIMIT_RSTFILE=100000:00:00
-
-ATHENA_CONFIG_FILE=athinput.master_project
 
 if [ "$BINAC2" ]; then
     WORKDIR="$WORK"/"$MYNAME"
