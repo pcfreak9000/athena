@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#!/bin/python
 
 """
 Read .athdf data files and write new ones as single block at constant refinement
@@ -23,16 +23,20 @@ import athena_read
 def main(**kwargs):
     if kwargs['end'] < kwargs['start']:
         raise Exception("end < start")
-    # Determine which files to process given possible MPI information
+    print("Determining max level")    
+# Determine which files to process given possible MPI information
     # yes, start+1 is correct. start itself is read below.
     file_nums = range(kwargs['start']+1, kwargs['end']+1, kwargs['stride'])
     file_nums_local = file_nums
     level_max = 0
+    count0 = 0
     for n in file_nums_local:
         input_filename = '{0}.{1:05d}.athdf'.format(kwargs['input_filename'], n)
         with h5py.File(input_filename, 'r') as f:
             level_max = max(level_max, f.attrs['MaxLevel'])
-    
+        count0 = count0 + 1
+        print(count0/len(file_nums_local))
+    print("Reading starting file")
     input_filename = '{0}.{1:05d}.athdf'.format(kwargs['input_filename'], kwargs['start'])
     output_filename = kwargs['output_filename']
     toavg = kwargs['quantities']
@@ -48,7 +52,7 @@ def main(**kwargs):
     basedata = athena_read.athdf(input_filename, quantities=kwargs['quantities'],
                                  level=level_max, subsample=False)
 
-
+    print("Averaging...")
     # Go through list of files
     count = 1
     for n in file_nums_local:
@@ -67,10 +71,7 @@ def main(**kwargs):
                         curavg = basedata[datasetName][i,j,k]
                         basedata[datasetName][i,j,k] = curavg * (count-1)/count + value / count
         del data # lets free some memory, even though technically this should be done automatically by python????
-        print(count)
-
-
-
+        print(count/len(file_nums_local))
 
         # Determine new grid size
     nx1 = attrs['RootGridSize'][0] * 2**level_max if attrs['MeshBlockSize'][0] > 1 else 1

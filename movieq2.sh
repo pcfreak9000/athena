@@ -1,6 +1,7 @@
 #!/bin/bash
 
 WORKDIR="$1"
+WORKDIR="${WORKDIR%/}"
 PLOT_OPTIONS="$2"
 MYNAME=$(basename "$WORKDIR")
 
