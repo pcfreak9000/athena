@@ -1,14 +1,9 @@
 #!/bin/bash
 
-MYNAME="$1"
+WORKDIR="$1"
 PLOT_OPTIONS="$2"
+MYNAME=$(basename "$WORKDIR")
 
-
-if [ "$BINAC2" ]; then
-    WORKDIR=$WORK/$MYNAME
-else
-    WORKDIR=$(pwd)/Gartenzwerg/$MYNAME
-fi
 export WORKDIR
 export ATHENA_GIT_DIR=$(pwd)
 export PLOT_OPTIONS
