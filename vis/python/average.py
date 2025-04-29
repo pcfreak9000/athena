@@ -67,7 +67,7 @@ def main(**kwargs):
                         curavg = basedata[datasetName][i,j,k]
                         basedata[datasetName][i,j,k] = curavg * (count-1)/count + value / count
         del data # lets free some memory, even though technically this should be done automatically by python????
-
+        print(count)
 
 
 
