@@ -7,7 +7,7 @@ import math
 input_file_path = "prefab-athinput.master_project"
 output_file_path = "athinput.pp_master_project"
 
-time = 1e4
+time = 5e3
 outputdt = 10
 spin = 0.0
 
