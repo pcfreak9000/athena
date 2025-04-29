@@ -34,7 +34,8 @@ run_with_lock(){
     )&
 }
 
-pwd
+#pwd
+echo "$png_dir"
 mkdir "$png_dir" &>/dev/null && echo "Created png directory." || echo "png directory already exists, overriding. Or there is an error..."
 open_sem $n_processes
 echo "Converting athdf's to png's with $n_processes processes."
