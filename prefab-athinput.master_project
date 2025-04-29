@@ -103,17 +103,18 @@ pgas_min  = 1.0e-6              # floor on p_gas given by pgas_min ...
 pgas_pow  = -2.5                # ... * r^pgas_pow
 sigma_max = 100.0               # maximum allowed value of 2*p_mag/rho
 beta_min  = 0.001               # minimum allowed value of p_gas/p_mag
+gamma_max = 50.0
 
 <problem>
 
 # torus parameters
-theta_nocool = 0.1
+theta_nocool = {TH_NOCOOL}
 prograde   = true    # flag indicating disk is prograde
-r_edge     = 15.0     # radius of inner edge of disk
-r_peak     = 25.0    # radius of pressure maximum; use l instead if negative
+r_edge     = {R_EDGE}     # radius of inner edge of disk
+r_peak     = {R_PEAK}    # radius of pressure maximum; use l instead if negative
 l          = 4.428   # constant ang. mom. per unit mass u^t u_phi; only used if r_peak < 0
 r_peak_max = 100000.0  # upper bound on r_peak if setting l and finding r_peak
-rho_max    = 10.0     # scale density to have this value at pressure maximum
+rho_max    = 1.0     # scale density to have this value at pressure maximum. Per recommendation, we leave this at 1.0
 
 # tilt parameter
 tilt_angle = 0.0  # angle (degrees) at which to incline disk spin axis relative to BH spin

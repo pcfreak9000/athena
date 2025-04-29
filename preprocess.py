@@ -9,11 +9,15 @@ output_file_path = "athinput.pp_master_project"
 
 time = 1e4
 outputdt = 10
-mass = 1.0
 spin = 0.0
 
+th_nocool = 0.1
+
+r_edge = 10.0
+r_peak = 20.0
 
 
+mass = 1.0 #per recommendation, we leave this at 1
 horizon = mass * (1.0 + math.sqrt(1.0 - (spin/mass)**2))
 actualtime = time * mass
 actualdt = outputdt * mass
@@ -25,7 +29,10 @@ replacements = {
     "{HORIZON}": horizon,
     "{SPIN}": spin,
     "{TIME}": actualtime,
-    "{O_DT}": actualdt
+    "{O_DT}": actualdt,
+    "{TH_NOCOOL}": th_nocool,
+    "{R_EDGE}": r_edge,
+    "{R_PEAK}": r_peak
 }
 
 def replace_exact_strings(input_path, output_path, replacements_dict):
