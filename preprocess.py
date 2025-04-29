@@ -13,8 +13,8 @@ spin = 0.0
 
 th_nocool = 0.1
 
-r_edge = 10.0
-r_peak = 20.0
+r_edge = 8.0
+r_peak = 13.0
 
 
 mass = 1.0 #per recommendation, we leave this at 1
