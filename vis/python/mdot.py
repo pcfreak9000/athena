@@ -11,7 +11,7 @@ def integrate_flow(rho, velr, thcoords, thbord, radius):
     for thetaInd in range(len(thcoords)):
         dtheta = thbord[thetaInd + 1] - thbord[thetaInd]
         dS = radius*radius * math.sin(thcoords[thetaInd]) * dtheta #does this make sense????
-        flow += - rho[0, thetaInd, 0] * velr[0, thetaInd, 0] * dS
+        flow += - 2 * math.pi * rho[0, thetaInd, 0] * velr[0, thetaInd, 0] * dS
     return flow
     
 def main(**kwargs):
