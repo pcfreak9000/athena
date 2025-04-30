@@ -47,7 +47,7 @@ def main(**kwargs):
     zl = zip(*lis)
     with open(kwargs['output_filename'], 'w', newline='') as csvfile:
         writer = csv.writer(csvfile, delimiter=' ',quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        writer.writerow(['time', 'flow'])
+        writer.writerow(['#time', 'flow'])
         for t in zl:
             writer.writerow(t)
         

@@ -78,7 +78,7 @@ def main(**kwargs):
     with open(output_filename, 'w', newline='') as csvfile:
         writer = csv.writer(csvfile, delimiter=' ',
                             quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        writer.writerow(['x', 'y', 'density', 'u0', 'u1', 'u2', 'u3'])
+        writer.writerow(['#ix', 'y', 'density', 'u0', 'u1', 'u2', 'u3'])
         for t in zl:
             writer.writerow(t)
         
