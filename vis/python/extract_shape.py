@@ -14,7 +14,7 @@ g_si = 6.674e-11 #grav. constant in SI
 c_si = 2.998e8 #speed of light in SI
 dist_si_cgs = 100.0 #conversion factor from SI meters to cgs centimeters
 
-dist_geom_cgs = g_si/(c_si*c_si)*bh_mass_si*dist_si_cgs #conversion factor from geometric units distance to centimeters
+dist_geom_cgs = 100.0 #g_si/(c_si*c_si)*bh_mass_si*dist_si_cgs #conversion factor from geometric units distance to centimeters
 
 def getThetaTop(radiusInd, rho, rcoords, thcoords, thbord):
     tau = 0.0
@@ -53,6 +53,7 @@ def main(**kwargs):
     u2 = []
     u3 = []
     for rInd in range(0, rcoords.shape[0]):
+        #print(len(rcoords))
         thtop = getThetaTop(rInd, rho, rcoords, thcoords, thbord)
         # heights in geometric units
         if thtop == -1:
@@ -78,7 +79,7 @@ def main(**kwargs):
     with open(output_filename, 'w', newline='') as csvfile:
         writer = csv.writer(csvfile, delimiter=' ',
                             quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        writer.writerow(['#ix', 'y', 'density', 'u0', 'u1', 'u2', 'u3'])
+        writer.writerow(['#x', 'y', 'density', 'u0', 'u1', 'u2', 'u3'])
         for t in zl:
             writer.writerow(t)
         
