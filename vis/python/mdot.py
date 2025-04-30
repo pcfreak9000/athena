@@ -20,7 +20,9 @@ def main(**kwargs):
     file_nums = range(kwargs['start'], kwargs['end']+1, kwargs['stride'])
     flows = []
     times = []
+    count = 0
     for n in file_nums:
+        count = count + 1
         #input_filename = kwargs['input_filename']
         input_filename = '{0}.{1:05d}.athdf'.format(kwargs['input_filename'], n)
         data = athena_read.athdf(input_filename)
@@ -32,6 +34,7 @@ def main(**kwargs):
         flow = integrate_flow(rho, velr, thcoords, thbord, rcoords[0])
         flows.append(flow)
         times.append(data['Time'])
+        print(count/len(file_nums))
     lis = [times, flows]
     zl = zip(*lis)
     with open(kwargs['output_filename'], 'w', newline='') as csvfile:
