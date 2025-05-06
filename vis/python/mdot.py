@@ -11,7 +11,7 @@ def integrate_flow(rho, velr, thcoords, thbord, radius, a):
     flow = 0.0
     for thetaInd in range(len(thcoords)):
         dtheta = thbord[thetaInd + 1] - thbord[thetaInd]
-	costh = math.cos(thcoords[thetaInd])
+        costh = math.cos(thcoords[thetaInd])
         dS = (radius*radius + a*a*costh*costh) * math.sin(thcoords[thetaInd]) * dtheta
         flow += 2 * math.pi * rho[0, thetaInd, 0] * velr[0, thetaInd, 0] * dS
     return flow
@@ -73,7 +73,7 @@ if __name__ == '__main__':
                         default=0,
                         help='stride in file numbers to be converted')
     parser.add_argument('a',
-			type=float,
-			help='BH spin parameter')
+            type=float,
+            help='BH spin parameter')
     args = parser.parse_args()
     main(**vars(args))
