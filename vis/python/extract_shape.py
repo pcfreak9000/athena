@@ -8,13 +8,18 @@ import math
 import csv
 
 kappa = 0.4 #in cgs
-solar_mass_si = 1.988e30
-bh_mass_si = 5.0*solar_mass_si #in SI in kg
-g_si = 6.674e-11 #grav. constant in SI
-c_si = 2.998e8 #speed of light in SI
-dist_si_cgs = 100.0 #conversion factor from SI meters to cgs centimeters
+eta = 0.06 #radiative 
+mdottarget = 0.3
+mdotcode = 0.01
+solar_mass_cgs = 1.988e33
+bh_mass_cgs = 5.0*solar_mass_cgs
+g_cgs = 6.674e-8 #grav. constant in cgs
+c_cgs = 2.998e10 #speed of light in cgs
+rho_code_cgs = 4*math.pi*c_cgs*c_cgs/(g_cgs*bh_mass_cgs*kappa)*(mdottarget/eta)/mdotcode
+dist_geom_cgs = bh_mass_cgs * g_cgs/(c_cgs*c_cgs)
 
-dist_geom_cgs = 200.0 #g_si/(c_si*c_si)*bh_mass_si*dist_si_cgs #conversion factor from geometric units distance to centimeters
+tau_factor = 4*math.pi*mdottarget/(eta*mdotcode)
+
 
 def getThetaTop(radiusInd, rho, rcoords, thcoords, thbord):
     tau = 0.0
@@ -25,7 +30,7 @@ def getThetaTop(radiusInd, rho, rcoords, thcoords, thbord):
             return -1
         dtheta = thbord[thetaInd + 1] - thbord[thetaInd] 
         diff = radius * dtheta
-        tau += kappa * rho[0, thetaInd, radiusInd] * diff
+        tau += kappa * rho_code_cgs * rho[0, thetaInd, radiusInd] * diff
         thetaInd += 1
     return thetaInd
 
