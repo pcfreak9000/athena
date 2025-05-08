@@ -21,15 +21,17 @@ dist_geom_cgs = bh_mass_cgs * g_cgs/(c_cgs*c_cgs)
 tau_factor = 4*math.pi*mdottarget/(eta*mdotcode)
 
 
-def getThetaTop(radiusInd, rho, rcoords, thcoords, thbord):
+def getThetaTop(radiusInd, rho, rcoords, thcoords, thbord, a):
     tau = 0.0
     thetaInd = 0
-    radius = rcoords[radiusInd] * dist_geom_cgs
     while tau < 1.0:
         if thcoords[thetaInd] > math.pi/2.0:
             return -1
-        dtheta = thbord[thetaInd + 1] - thbord[thetaInd] 
-        diff = radius * dtheta
+        dtheta = thbord[thetaInd + 1] - thbord[thetaInd]
+        #Kerr-Schild coordinates -> ds^2=(a^2*cos^2(th)+r^2) dth^2
+        costh = math.cos(thcoords[thetaInd])
+        radius = rcoords[radiusInd]
+        diff = dist_geom_cgs * math.sqrt(a*a*costh*costh + radius*radius)
         tau += kappa * rho_code_cgs * rho[0, thetaInd, radiusInd] * diff
         thetaInd += 1
     return thetaInd
@@ -40,7 +42,7 @@ def getFromBorderIndex(array, indexTauGrOne):
 def main(**kwargs):
     input_filename = kwargs['input_filename']
     output_filename = kwargs['output_filename']
-    
+    a = kwargs['a']
     data = athena_read.athdf(input_filename)
     rho = data['rho'] 
     rcoords = data['x1v']
@@ -59,7 +61,7 @@ def main(**kwargs):
     u3 = []
     for rInd in range(0, rcoords.shape[0]):
         #print(len(rcoords))
-        thtop = getThetaTop(rInd, rho, rcoords, thcoords, thbord)
+        thtop = getThetaTop(rInd, rho, rcoords, thcoords, thbord, a)
         # heights in geometric units
         if thtop == -1:
             xs.append(rcoords[rInd])
@@ -97,5 +99,8 @@ if __name__ == '__main__':
     parser.add_argument('output_filename',
                         type=str,
                         help='name of new files to be saved, including directory')
+    parser.add_argument('a',
+                        type=float,
+                        help='BH spin parameter')
     args = parser.parse_args()
     main(**vars(args))
