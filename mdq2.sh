@@ -1,10 +1,12 @@
 #!/bin/bash
 
+BH_SPIN="$2"
 WORKDIR="$1"
 WORKDIR="${WORKDIR%/}"
 myname=$(basename "$WORKDIR")
 
 export WORKDIR
+export BH_SPIN
 
 #echo "$WORKDIR"
 
