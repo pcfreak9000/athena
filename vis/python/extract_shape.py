@@ -7,16 +7,16 @@ import athena_read
 import math
 import csv
 
-kappa = 0.4 #in cgs
+# kappa = 0.4 #in cgs
 eta = 0.06 #radiative 
 mdottarget = 0.3
 mdotcode = 0.01
-solar_mass_cgs = 1.988e33
-bh_mass_cgs = 5.0*solar_mass_cgs
-g_cgs = 6.674e-8 #grav. constant in cgs
-c_cgs = 2.998e10 #speed of light in cgs
-rho_code_cgs = 4*math.pi*c_cgs*c_cgs/(g_cgs*bh_mass_cgs*kappa)*(mdottarget/eta)/mdotcode
-dist_geom_cgs = bh_mass_cgs * g_cgs/(c_cgs*c_cgs)
+# solar_mass_cgs = 1.988e33
+# bh_mass_cgs = 5.0*solar_mass_cgs
+# g_cgs = 6.674e-8 #grav. constant in cgs
+# c_cgs = 2.998e10 #speed of light in cgs
+# rho_code_cgs = 4*math.pi*c_cgs*c_cgs/(g_cgs*bh_mass_cgs*kappa)*(mdottarget/eta)/mdotcode
+# dist_geom_cgs = bh_mass_cgs * g_cgs/(c_cgs*c_cgs)
 
 tau_factor = 4*math.pi*mdottarget/(eta*mdotcode)
 
@@ -31,8 +31,8 @@ def getThetaTop(radiusInd, rho, rcoords, thcoords, thbord, a):
         #Kerr-Schild coordinates -> ds^2=(a^2*cos^2(th)+r^2) dth^2
         costh = math.cos(thcoords[thetaInd])
         radius = rcoords[radiusInd]
-        diff = dist_geom_cgs * math.sqrt(a*a*costh*costh + radius*radius)
-        tau += kappa * rho_code_cgs * rho[0, thetaInd, radiusInd] * diff
+        diff = math.sqrt(a*a*costh*costh + radius*radius)
+        tau += tau_factor * rho[0, thetaInd, radiusInd] * diff
         thetaInd += 1
     return thetaInd
 
