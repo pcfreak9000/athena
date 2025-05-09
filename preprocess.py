@@ -7,16 +7,14 @@ import math
 input_file_path = "prefab-athinput.master_project"
 output_file_path = "athinput.pp_master_project"
 
-time = 6e4
+time = 5e4
 outputdt = 10
 spin = 0.0
 
+r_edge = 20.0
+r_peak = 35.0
+
 th_nocool = 0.1
-
-r_edge = 8.0
-r_peak = 18.0
-
-
 mass = 1.0 #per recommendation, we leave this at 1
 horizon = mass * (1.0 + math.sqrt(1.0 - (spin/mass)**2))
 actualtime = time * mass
