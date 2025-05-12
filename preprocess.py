@@ -11,7 +11,7 @@ time = 5e4
 outputdt = 10
 spin = 0.0
 
-r_edge = 20.0
+r_edge = 15.0
 r_peak = 35.0
 
 th_nocool = 0.1
