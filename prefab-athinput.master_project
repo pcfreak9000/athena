@@ -25,6 +25,10 @@ file_type = rst
 id = restart
 dt = 100000000 #hmmmm
 
+<output3>
+file_type = hst
+dt = {O_DT}
+
 <mesh>
 num_threads = 1
 refinement = static
@@ -157,6 +161,7 @@ pert_kr  = 0.0  # cylindrical radial wavenumber of perturbations
 pert_kz  = 0.0  # vertical wavenumber of perturbations
 
 # history file sampling parameters
-num_flux_radii = 2                   # number of radii at which fluxes should be logged
-flux_radius_1  = 1.7970764820236862  # first radius to sample
-flux_radius_2  = 6.0                 # second radius to sample
+num_flux_radii = 3                   # number of radii at which fluxes should be logged
+flux_radius_1  = {HORIZON} #1.7970764820236862  # first radius to sample
+flux_radius_2  = 5.0                 # second radius to sample
+flux_radius_3 = 6.0
