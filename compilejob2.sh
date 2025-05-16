@@ -11,7 +11,7 @@
 
 S_WORKER_THREADS=$SLURM_JOB_CPUS_PER_NODE
 
-ATHENA_CONFIG_FILE=athinput.master_project
+ATHENA_CONFIG_FILE=athinput.pp_master_project
 
 cd $HOME/athena/
 
