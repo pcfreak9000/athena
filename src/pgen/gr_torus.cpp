@@ -127,9 +127,9 @@ void Mesh::InitUserMeshData(ParameterInput *pin) {
   }
 
 
-  
 
-  
+
+
 
   theta_nocool = pin->GetReal("problem", "theta_nocool");
 
@@ -152,7 +152,7 @@ void Mesh::InitUserMeshData(ParameterInput *pin) {
   }
   r_isco *= m;
   //std::cout << "r_isco: " << r_isco << std::endl;
-  
+
   r_edge = pin->GetReal("problem", "r_edge");
   r_peak = pin->GetReal("problem", "r_peak");
   if (r_peak < 0.0) {
@@ -259,9 +259,9 @@ void Mesh::InitUserMeshData(ParameterInput *pin) {
   rho_amp = rho_max / std::pow(pgas_over_rho_peak, 1.0 / (gamma_adi - 1.0));
   sin_tilt = std::sin(tilt);
   cos_tilt = std::cos(tilt);
-  
+
   EnrollUserExplicitSourceFunction(Cooling);
-  
+
   return;
 }
 
@@ -290,13 +290,16 @@ void MeshBlock::InitUserMeshBlockData(ParameterInput *pin) {
 
   // Allocate space for user output variables
   if (MAGNETIC_FIELDS_ENABLED) {
-    AllocateUserOutputVariables(2+4);
+    AllocateUserOutputVariables(2+4+3);
     SetUserOutputVariableName(0, "gamma");
     SetUserOutputVariableName(1, "pmag");
     SetUserOutputVariableName(2, "u0");
     SetUserOutputVariableName(3, "u1");
     SetUserOutputVariableName(4, "u2");
     SetUserOutputVariableName(5, "u3");
+    SetUserOutputVariableName(6, "q1");
+    SetUserOutputVariableName(7, "q2");
+    SetUserOutputVariableName(8, "q3");
   } else {
     AllocateUserOutputVariables(1+4);
     SetUserOutputVariableName(0, "gamma");
@@ -316,7 +319,7 @@ void MeshBlock::InitUserMeshBlockData(ParameterInput *pin) {
     int block_num_2 = pin->GetInteger("meshblock", "nx2");
     int block_num_3 = pin->GetInteger("meshblock", "nx3");
     // int num_blocks_this_rank = pmy_mesh->GetNumMeshBlocksThisRank(Globals::my_rank);
-    int num_blocks_this_rank = pmy_mesh->nblocal; 
+    int num_blocks_this_rank = pmy_mesh->nblocal;
     gcov.NewAthenaArray(num_blocks_this_rank, NMETRIC, block_num_3 + NGHOST,
                         block_num_2 + NGHOST, block_num_1 + NGHOST);
     gcon.NewAthenaArray(num_blocks_this_rank, NMETRIC, block_num_3 + NGHOST,
@@ -764,6 +767,52 @@ void MeshBlock::UserWorkBeforeOutput(ParameterInput *pin) {
         Real b_sq = b0 * b_0 + b1 * b_1 + b2 * b_2 + b3 * b_3;
         if (MAGNETIC_FIELDS_ENABLED) {
           user_out_var(1,k,j,i) = b_sq / 2.0;
+          //Calculation of quality factors according to Porth et al. 2019, Takahashi 2008, New Frontiers of GRMHD (Bambi et al. 2025) and the Athena docs
+          Real r,th,ph;
+          GetKerrSchildCoordinates(x1,x2,x3, &r, &th, &ph);
+
+          Real sigma = SQR(r) + SQR(a) * SQR(std::cos(th));                       // \Sigma
+          Real betar = (2*m*r/sigma) / (1 + 2*m*r/sigma);
+
+
+          Real n_0,n_1,n_2,n_3;
+          n_0 = -alpha;
+          n_1 = 0.0;
+          n_2 = 0.0;
+          n_3 = 0.0;
+          Real n0,n1,n2,n3;
+          pcoord->RaiseVectorCell(n_0, n_1, n_2, n_3, k, j, i, &n0, &n1, &n2, &n3);
+          Real yrr = gi(I11,i) + n1*n1;
+          Real y_thth = g(I22,i);
+          Real y_phph = g(I33,i);
+          Real y_rph = g(I13,i);
+
+          Real omega = u3 / u0;
+          Real rho = phydro->w(IDN,k,j,i);
+          Real pgas = phydro->w(IPR,k,j,i);
+          Real adiabatic = gamma_adi;
+          Real wgas = rho + adiabatic/(adiabatic-1.0)*pgas;
+          Real wtot = b_sq + wgas;
+          Real lambdafactor = TWO_PI / (omega*std::sqrt(wtot));
+
+          Real istyrr = 1.0 / std::sqrt(yrr);
+          Real sty_phph = std::sqrt(y_phph);
+          Real sty_thth = std::sqrt(y_thth);
+
+          Real lambdar = lambdafactor * (b0*betar*istyrr + b1*istyrr);
+          Real lambdath = lambdafactor * (b2*sty_thth);
+          Real lambdaph = lambdafactor * (b0*betar*y_rph/sty_phph + b1*y_rph/sty_phph + b3*sty_phph);
+
+          Real dr = pcoord->dx1f(i);
+          Real dth = pcoord->dx2f(j);
+          Real dph = pcoord->dx3f(k);
+          //finally calculate quality factors
+          Real qr = lambdar / (dr*istyrr);
+          Real qth = lambdath / (dth*sty_thth);
+          Real qph = lambdaph / (dph*sty_phph);
+          user_out_var(6+offset,k,j,i) = qr;
+          user_out_var(7+offset,k,j,i) = qth;
+          user_out_var(8+offset,k,j,i) = qph;
         }
       }
     }
@@ -1035,10 +1084,10 @@ void Cooling(MeshBlock *pmb, const Real time, const Real dt,
         Real pgas = prim(IPR,k,j,i);
         Real K = pgas / pow(rho, gamma_adi);
         Real u_g = pgas/(gamma_adi-1);
-        
+
         Real R = r*sin(th);
         Real omega_k = 1./(a + pow(R,1.5));
-        
+
         Real tau_cool = 2 * M_PI / omega_k ;
         Real K_c = pgas_min / pow(rho_min, gamma_adi);
 
