@@ -4,7 +4,9 @@ WORKDIR="$1"
 WORKDIR="${WORKDIR%/}"
 PLOT_OPTIONS="$2"
 MYNAME=$(basename "$WORKDIR")
+MNAME="$3"
 
+export MNAME
 export WORKDIR
 export ATHENA_GIT_DIR=$(pwd)
 export PLOT_OPTIONS
