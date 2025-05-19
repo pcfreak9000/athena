@@ -14,4 +14,4 @@ if [ -z "$MNAME" ]; then
     MNAME=out
 fi
 
-"$WORKDIR"/create_movie.sh "$ATHDF_DIR" "$WORKDIR"/pngs 25 "$WORKDIR"/"$MNAME".mp4 "$ATHENA_GIT_DIR" "$PLOT_OPTIONS" noprogress
+"$WORKDIR"/create_movie.sh "$ATHDF_DIR" "$WORKDIR"/pngs_"$MNAME" 25 "$WORKDIR"/"$MNAME".mp4 "$ATHENA_GIT_DIR" "$PLOT_OPTIONS" noprogress
