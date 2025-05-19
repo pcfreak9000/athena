@@ -274,6 +274,8 @@ def main(**kwargs):
             vals_x = dx_dr * vals_r + dx_dtheta * vals_theta
             vals_z = dz_dr * vals_r + dz_dtheta * vals_theta
 
+    if kwargs['abs'] is not None:
+        vals = np.abs(vals)
     # Determine colormapping properties
     cmap = plt.get_cmap(kwargs['colormap'])
     vmin = kwargs['vmin']
@@ -391,5 +393,6 @@ if __name__ == '__main__':
                         default=None,
                         help=('compression parameter h in '
                               'theta = pi*x_2 + (1-h)/2 * sin(2*pi*x_2)'))
+    parser.add_argument('--abs', action='store_true',help=('plot abs(values) instead of values'))
     args = parser.parse_args()
     main(**vars(args))
