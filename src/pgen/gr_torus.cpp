@@ -807,9 +807,9 @@ void MeshBlock::UserWorkBeforeOutput(ParameterInput *pin) {
           Real dth = pcoord->dx2f(j);
           Real dph = pcoord->dx3f(k);
           //finally calculate quality factors
-          Real qr = lambdar / (dr*istyrr);
-          Real qth = lambdath / (dth*sty_thth);
-          Real qph = lambdaph / (dph*sty_phph);
+          Real qr = std::abs(lambdar / (dr*istyrr));
+          Real qth = std::abs(lambdath / (dth*sty_thth));
+          Real qph = std::abs(lambdaph / (dph*sty_phph));
           user_out_var(6+offset,k,j,i) = qr;
           user_out_var(7+offset,k,j,i) = qth;
           user_out_var(8+offset,k,j,i) = qph;
