@@ -812,9 +812,10 @@ void MeshBlock::UserWorkBeforeOutput(ParameterInput *pin) {
           Real qph = std::abs(lambdaph / (dph*sty_phph));
 
           //jet region otherwise gets insane values like >1e6...
-          qr = std::min(qr, 12.0);
-          qth = std::min(qth, 12.0);
-          qph = std::min(qph, 24.0);
+          //if required, we can also do that in the analysis part...
+          //qr = std::min(qr, 12.0);
+          //qth = std::min(qth, 12.0);
+          //qph = std::min(qph, 24.0);
           user_out_var(6+offset,k,j,i) = qr;
           user_out_var(7+offset,k,j,i) = qth;
           user_out_var(8+offset,k,j,i) = qph;
