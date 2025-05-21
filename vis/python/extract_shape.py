@@ -64,7 +64,7 @@ def main(**kwargs):
         thtop = getThetaTop(rInd, rho, rcoords, thcoords, thbord, a)
         # heights in geometric units
         if thtop == -1:
-            xs.append(rcoords[rInd])
+            xs.append(math.sqrt(rcoords[rInd]**2 + a*a)
             ys.append(0.0)
             densities.append(0.0)
             u0.append(0.0)
@@ -72,8 +72,8 @@ def main(**kwargs):
             u2.append(0.0)
             u3.append(0.0)
         else:
-            xs.append(rcoords[rInd]*math.sin(getFromBorderIndex(thcoords, thtop)))
-            ys.append(rcoords[rInd]*math.cos(getFromBorderIndex(thcoords, thtop)))
+            xs.append(math.sqrt(rcoords[rInd]**2 + a*a) * math.sin(getFromBorderIndex(thcoords, thtop)))
+            ys.append(math.sqrt(rcoords[rInd]**2 + a*a) * math.cos(getFromBorderIndex(thcoords, thtop)))
             densities.append(getFromBorderIndex(rho[0, :, rInd], thtop))
             u0.append(getFromBorderIndex(du0[0, :, rInd], thtop))
             u1.append(getFromBorderIndex(du1[0, :, rInd], thtop))
