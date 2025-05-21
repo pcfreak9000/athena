@@ -6,51 +6,65 @@ import athena_read
 import math
 import csv
 import multiprocessing
+import numpy as np
 
-def integrate_flow(rho, velr, thcoords, thbord, radius, a):
-    flow = 0.0
-    for thetaInd in range(len(thcoords)):
-        dtheta = thbord[thetaInd + 1] - thbord[thetaInd]
-        costh = math.cos(thcoords[thetaInd])
-        dS = (radius*radius + a*a*costh*costh) * math.sin(thcoords[thetaInd]) * dtheta
-        flow += 2 * math.pi * rho[0, thetaInd, 0] * velr[0, thetaInd, 0] * dS
-    return flow
-
-def eval(input_filename):    
-    data = athena_read.athdf(input_filename[0])
-    a = input_filename[1]
-    rho = data['rho']
-    velr = data['vel1']
-    thcoords = data['x2v']
-    thbord = data['x2f']
-    rcoords = data['x1v']
-    flow = integrate_flow(rho, velr, thcoords, thbord, rcoords[0], a)
-    print(input_filename)
-    return (data['Time'], flow)
+def eval(input_filename):
+    level = input_filename[2]
+    quants = input_filename[1]    
+    data = athena_read.athdf(input_filename[0],return_levels=True)
+    levels = data['Levels'].flatten()
+    weights = []
+    for l in levels:
+        if l>=level:
+            weights.append(1)
+        else:
+            weights.append(0)
+    #print(quants)
+    res = [data['Time']]
+    for q in quants:
+        qd = data[q].flatten()
+        avg = np.average(qd, weights=weights)
+        res.append(avg)       
+    print(input_filename[0])
+    return res
      
 def main(**kwargs):
     if kwargs['end'] < kwargs['start']:
         raise Exception("end < start")
     file_nums = range(kwargs['start'], kwargs['end']+1, kwargs['stride'])
-    qantity = []
-    times = []
-    pool = multiprocessing.Pool(64)
+    pool = multiprocessing.Pool(4)
     input_filenames = []
+    toavg = kwargs['quantities']
+
+    #input_filenames.append([kwargs['input_filename'],None,kwargs['lvl']])
     for n in file_nums:
-        #input_filename = kwargs['input_filename']
-        input_filenames.append(('{0}.{1:05d}.athdf'.format(kwargs['input_filename'], n), kwargs['a']))
+        input_filenames.append(('{0}.{1:05d}.athdf'.format(kwargs['input_filename'], n),None,kwargs['lvl']))
+        
+    if toavg is None:        
+            toavg = np.array([x.decode('ascii', 'replace') for x in athena_read.athdf(input_filenames[0][0])['VariableNames']])
+
+    for i in input_filenames:
+        i[1] = toavg
+        
     results = pool.map(eval, input_filenames)
-    for r in results:
-        times.append(r[0])
-        quantity.append(r[1])
+    #lis = []
+    #for q in toavg:
+    #    lis.append([])
+    #for i in range(results):
+    #    r = results[i]
+    #    for x in r:
+    #        lis[i].append(x)
     pool.close()
     pool.terminate()
-    lis = [times, quantity]
-    zl = zip(*lis)
+    #lis = [times, quantity]
+    #zl = zip(*lis)
+    names = ['#time']
+    for q in toavg:
+        names.append(q)
     with open(kwargs['output_filename'], 'w', newline='') as csvfile:
         writer = csv.writer(csvfile, delimiter=' ',quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        writer.writerow(['#time', 'quantity'])
-        for t in zl:
+        writer.writerow(names)
+        for t in results:
             writer.writerow(t)
         
 # Execute main function
@@ -72,8 +86,10 @@ if __name__ == '__main__':
                         type=int,
                         default=0,
                         help='stride in file numbers to be converted')
-    parser.add_argument('quantity',
+    parser.add_argument('-q', '--quantities',
             type=str,
+            nargs='+',
             help='quantities to be averaged')
+    parser.add_argument('--lvl', type=int, default=0, help='Min level to avg over')
     args = parser.parse_args()
     main(**vars(args))
