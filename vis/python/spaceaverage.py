@@ -9,6 +9,7 @@ import multiprocessing
 import numpy as np
 
 def eval(input_filename):
+    maxvv = input_filename[3]
     level = input_filename[2]
     quants = input_filename[1]    
     data = athena_read.athdf(input_filename[0],return_levels=True)
@@ -21,8 +22,12 @@ def eval(input_filename):
             weights.append(0)
     #print(quants)
     res = [data['Time']]
+    if maxvv is not None:
+        maxv = np.full(len(weights), maxvv)
     for q in quants:
         qd = data[q].flatten()
+        if maxvv is not None:
+            qd = np.minimum(qd, maxv)
         avg = np.average(qd, weights=weights)
         res.append(avg)       
     print(input_filename[0])
@@ -32,11 +37,11 @@ def main(**kwargs):
     if kwargs['end'] < kwargs['start']:
         raise Exception("end < start")
     file_nums = range(kwargs['start'], kwargs['end']+1, kwargs['stride'])
-    pool = multiprocessing.Pool(4)
+    pool = multiprocessing.Pool(64)
     input_filenames = []
     toavg = kwargs['quantities']
 
-    #input_filenames.append([kwargs['input_filename'],None,kwargs['lvl']])
+    input_filenames.append([kwargs['input_filename'],None,kwargs['lvl'],kwargs['max']])
     for n in file_nums:
         input_filenames.append(('{0}.{1:05d}.athdf'.format(kwargs['input_filename'], n),None,kwargs['lvl']))
         
@@ -86,6 +91,7 @@ if __name__ == '__main__':
                         type=int,
                         default=0,
                         help='stride in file numbers to be converted')
+    parser.add_argument('--max', type=float, default=None, help='limit used values to max')
     parser.add_argument('-q', '--quantities',
             type=str,
             nargs='+',
