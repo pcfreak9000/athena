@@ -9,7 +9,7 @@ import csv
 
 # kappa = 0.4 #in cgs
 eta = 0.06 #radiative 
-mdottarget = 0.3
+mdottarget = 0.01
 mdotcode = 0.01
 # solar_mass_cgs = 1.988e33
 # bh_mass_cgs = 5.0*solar_mass_cgs
@@ -27,12 +27,15 @@ def getThetaTop(radiusInd, rho, rcoords, thcoords, thbord, a):
     while tau < 1.0:
         if thcoords[thetaInd] > math.pi/2.0:
             return -1
+        #is this correct? should be, but really?
         dtheta = thbord[thetaInd + 1] - thbord[thetaInd]
+
         #Kerr-Schild coordinates -> ds^2=(a^2*cos^2(th)+r^2) dth^2
         costh = math.cos(thcoords[thetaInd])
         radius = rcoords[radiusInd]
-        diff = math.sqrt(a*a*costh*costh + radius*radius)
+        diff = math.sqrt(a*a*costh*costh + radius*radius) * dtheta
         tau += tau_factor * rho[0, thetaInd, radiusInd] * diff
+
         thetaInd += 1
     return thetaInd
 
@@ -64,7 +67,7 @@ def main(**kwargs):
         thtop = getThetaTop(rInd, rho, rcoords, thcoords, thbord, a)
         # heights in geometric units
         if thtop == -1:
-            xs.append(math.sqrt(rcoords[rInd]**2 + a*a)
+            xs.append(math.sqrt(rcoords[rInd]**2 + a*a))
             ys.append(0.0)
             densities.append(0.0)
             u0.append(0.0)
