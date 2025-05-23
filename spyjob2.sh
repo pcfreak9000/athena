@@ -1,9 +1,12 @@
 #!/bin/bash
 
 WORKDIR="${2%/}"
-SCRIPT="$1"
+SCRIPT=$(pwd)/"$1"
 SCRIPT_ARGS="${@:4}"
 tasks="$3"
+
+
+
 
 export WORKDIR
 export SCRIPT
