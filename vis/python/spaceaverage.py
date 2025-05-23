@@ -41,9 +41,9 @@ def main(**kwargs):
     input_filenames = []
     toavg = kwargs['quantities']
 
-    input_filenames.append([kwargs['input_filename'],None,kwargs['lvl'],kwargs['max']])
+    #input_filenames.append([kwargs['input_filename'],None,kwargs['lvl'],kwargs['max']])
     for n in file_nums:
-        input_filenames.append(('{0}.{1:05d}.athdf'.format(kwargs['input_filename'], n),None,kwargs['lvl']))
+        input_filenames.append(['{0}.{1:05d}.athdf'.format(kwargs['input_filename'], n),None,kwargs['lvl'], kwargs['max']])
         
     if toavg is None:        
             toavg = np.array([x.decode('ascii', 'replace') for x in athena_read.athdf(input_filenames[0][0])['VariableNames']])
