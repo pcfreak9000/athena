@@ -25,7 +25,7 @@ def eval(input_filename):
     thbord = data['x2f']
     rcoords = data['x1v']
     flow = integrate_flow(rho, velr, thcoords, thbord, rcoords[0], a)
-    print(input_filename)
+    print(input_filename[0])
     return (data['Time'], flow)
      
 def main(**kwargs):
