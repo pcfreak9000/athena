@@ -6,5 +6,5 @@ echo "$ATHDF_DIR"
 
 source "$HOME"/miniconda3/etc/profile.d/conda.sh
 conda activate master_project_env
-
+echo "$SCRIPT"
 python -u "$SCRIPT" $SCRIPT_ARGS
