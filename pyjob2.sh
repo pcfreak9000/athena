@@ -9,6 +9,6 @@ conda activate master_project_env
 
 echo "$SCRIPT"
 echo "$WORKDIR"
-echo $(eval $SCRIPT_ARGS)
+echo $(eval echo $SCRIPT_ARGS)
 
-python -u "$SCRIPT" $(eval $SCRIPT_ARGS)
+python -u "$SCRIPT" $(eval echo $SCRIPT_ARGS)
