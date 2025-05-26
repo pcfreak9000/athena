@@ -91,7 +91,7 @@ nx3 = 1
 #level = 2
 
 <refinement1>
-level = 3                   # refinement level relative to root (0)
+level = 2                   # refinement level relative to root (0)
 x1min = {HORIZON}  # outermost inner boundary
 x1max = 60.0                # innermost outer boundary
 x2min = 1.0817477042468103  # lowest upper boundary
