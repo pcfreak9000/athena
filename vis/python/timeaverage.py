@@ -71,6 +71,8 @@ def main(**kwargs):
                         if kwargs['nanzero'] and math.isnan(value):
                             value = 0.0
                         curavg = basedata[datasetName][i,j,k]
+                        if count <= 2 and kwargs['nanzero'] and math.isnan(curavg):
+                            curvavg = 0.0
                         basedata[datasetName][i,j,k] = curavg * (count-1)/count + value / count
         del data # lets free some memory, even though technically this should be done automatically by python????
         print(count/len(file_nums_local))
