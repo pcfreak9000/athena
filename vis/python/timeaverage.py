@@ -14,6 +14,7 @@ import os
 # Other Python modules
 import h5py
 import numpy as np
+import math
 # Athena++ modules
 import athena_read
 
