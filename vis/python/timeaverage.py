@@ -68,6 +68,8 @@ def main(**kwargs):
                 for j in range(shape[1]):
                     for k in range(shape[2]):
                         value = data[datasetName][i,j,k]
+                        if kwargs['nanzero'] and math.isnan(value):
+                            value = 0.0
                         curavg = basedata[datasetName][i,j,k]
                         basedata[datasetName][i,j,k] = curavg * (count-1)/count + value / count
         del data # lets free some memory, even though technically this should be done automatically by python????
@@ -204,6 +206,8 @@ if __name__ == '__main__':
     parser.add_argument('-x',
                         action='store_false',
                         help='flag indicating an XDMF file should be written')
+    parser.add_argument('--nanzero', action='store_true', help='flag indicating to turn NANs into 0.0')
+    #parser.add_argument('--max', type=float, default=None, help='limit abs of used values to max')
     parser.add_argument('-q', '--quantities',
                         type=str,
                         nargs='+',
