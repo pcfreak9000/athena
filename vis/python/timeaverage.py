@@ -73,12 +73,12 @@ def main(**kwargs):
                             value = 0.0
                         curavg = basedata[datasetName][i,j,k]
                         if count <= 2 and kwargs['nanzero'] and math.isnan(curavg):
-                            curvavg = 0.0
+                            curavg = 0.0
                         basedata[datasetName][i,j,k] = curavg * (count-1)/count + value / count
         del data # lets free some memory, even though technically this should be done automatically by python????
         print(count/len(file_nums_local))
 
-        # Determine new grid size
+    # Determine new grid size
     nx1 = attrs['RootGridSize'][0] * 2**level_max if attrs['MeshBlockSize'][0] > 1 else 1
     nx2 = attrs['RootGridSize'][1] * 2**level_max if attrs['MeshBlockSize'][1] > 1 else 1
     nx3 = attrs['RootGridSize'][2] * 2**level_max if attrs['MeshBlockSize'][2] > 1 else 1
