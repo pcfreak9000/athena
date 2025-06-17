@@ -19,12 +19,13 @@ mdotcode = 0.01
 # dist_geom_cgs = bh_mass_cgs * g_cgs/(c_cgs*c_cgs)
 
 tau_factor = 4*math.pi*mdottarget/(eta*mdotcode)
-
+tau_target = 1.0
 
 def getThetaTop(radiusInd, rho, rcoords, thcoords, thbord, a):
     tau = 0.0
     thetaInd = 0
-    while tau < 1.0:
+    prevTau = 0.0
+    while tau < tau_target:
         if thcoords[thetaInd] > math.pi/2.0:
             return -1
         #is this correct? should be, but really?
@@ -34,13 +35,15 @@ def getThetaTop(radiusInd, rho, rcoords, thcoords, thbord, a):
         costh = math.cos(thcoords[thetaInd])
         radius = rcoords[radiusInd]
         diff = math.sqrt(a*a*costh*costh + radius*radius) * dtheta
+        prevTau = tau
         tau += tau_factor * rho[0, thetaInd, radiusInd] * diff
 
         thetaInd += 1
-    return thetaInd
+    
+    return thetaInd, (tau_target - prevTau) / (tau - prevTau)
 
-def getFromBorderIndex(array, indexTauGrOne):
-    return 0.5 * array[indexTauGrOne] + 0.5 * array[indexTauGrOne - 1]
+def getFromBorderIndex(array, indexTauGrOne, interpol):
+    return interpol * array[indexTauGrOne] + (1.0 - interpol) * array[indexTauGrOne - 1]
 
 def main(**kwargs):
     input_filename = kwargs['input_filename']
@@ -64,7 +67,8 @@ def main(**kwargs):
     u3 = []
     for rInd in range(0, rcoords.shape[0]):
         #print(len(rcoords))
-        thtop = getThetaTop(rInd, rho, rcoords, thcoords, thbord, a)
+        thtop, interpol = getThetaTop(rInd, rho, rcoords, thcoords, thbord, a)
+        # interpol = 0.5
         # heights in geometric units
         if thtop == -1:
             xs.append(math.sqrt(rcoords[rInd]**2 + a*a))
@@ -75,13 +79,13 @@ def main(**kwargs):
             u2.append(0.0)
             u3.append(0.0)
         else:
-            xs.append(math.sqrt(rcoords[rInd]**2 + a*a) * math.sin(getFromBorderIndex(thcoords, thtop)))
-            ys.append(math.sqrt(rcoords[rInd]**2 + a*a) * math.cos(getFromBorderIndex(thcoords, thtop)))
-            densities.append(getFromBorderIndex(rho[0, :, rInd], thtop))
-            u0.append(getFromBorderIndex(du0[0, :, rInd], thtop))
-            u1.append(getFromBorderIndex(du1[0, :, rInd], thtop))
-            u2.append(getFromBorderIndex(du2[0, :, rInd], thtop))
-            u3.append(getFromBorderIndex(du3[0, :, rInd], thtop))
+            xs.append(math.sqrt(rcoords[rInd]**2 + a*a) * math.sin(getFromBorderIndex(thcoords, thtop, interpol)))
+            ys.append(rcoords[rInd] * math.cos(getFromBorderIndex(thcoords, thtop, interpol)))
+            densities.append(getFromBorderIndex(rho[0, :, rInd], thtop, interpol))
+            u0.append(getFromBorderIndex(du0[0, :, rInd], thtop, interpol))
+            u1.append(getFromBorderIndex(du1[0, :, rInd], thtop, interpol))
+            u2.append(getFromBorderIndex(du2[0, :, rInd], thtop, interpol))
+            u3.append(getFromBorderIndex(du3[0, :, rInd], thtop, interpol))
 
     #lis = [rcoords, heights, densities, u0, u1, u2, u3]
     lis = [xs, ys, densities, u0, u1, u2, u3]
