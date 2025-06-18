@@ -1096,7 +1096,7 @@ void Cooling(MeshBlock *pmb, const Real time, const Real dt,
 
         Real tau_cool = 2 * M_PI / omega_k ;
         Real K_c = pgas_min / pow(rho_min, gamma_adi);
-#define COOLING_MULT 2.0
+#define COOLING_MULT 1.0
         //Real shape_theta = exp(-1*pow((th - (M_PI/2)),2) / (2*theta_nocool*theta_nocool));
         Real shape_theta = exp(-1*SQR(th - (M_PI/2.0)) / (2.0 * SQR(theta_nocool)));
         Real lnKkc = log(COOLING_MULT * K / K_c);
