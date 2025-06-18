@@ -9,8 +9,8 @@ import csv
 
 # kappa = 0.4 #in cgs
 eta = 0.06 #radiative 
-mdottarget = 0.01
-mdotcode = 0.01
+mdottarget = 0.1
+mdotcode = 0.0003*50
 # solar_mass_cgs = 1.988e33
 # bh_mass_cgs = 5.0*solar_mass_cgs
 # g_cgs = 6.674e-8 #grav. constant in cgs
@@ -27,20 +27,25 @@ def getThetaTop(radiusInd, rho, rcoords, thcoords, thbord, a):
     prevTau = 0.0
     while tau < tau_target:
         if thcoords[thetaInd] > math.pi/2.0:
-            return -1
-        #is this correct? should be, but really?
+            return -1, 0.0
+
         dtheta = thbord[thetaInd + 1] - thbord[thetaInd]
 
         #Kerr-Schild coordinates -> ds^2=(a^2*cos^2(th)+r^2) dth^2
         costh = math.cos(thcoords[thetaInd])
         radius = rcoords[radiusInd]
         diff = math.sqrt(a*a*costh*costh + radius*radius) * dtheta
+
+        effRho = rho[0, thetaInd, radiusInd]
+        if effRho <= 1.0e-4:
+            effRho = 0
         prevTau = tau
-        tau += tau_factor * rho[0, thetaInd, radiusInd] * diff
+        tau += tau_factor * effRho * diff
 
         thetaInd += 1
-    
-    return thetaInd, (tau_target - prevTau) / (tau - prevTau)
+
+    interpol = (tau_target - prevTau) / (tau - prevTau)
+    return thetaInd, interpol
 
 def getFromBorderIndex(array, indexTauGrOne, interpol):
     return interpol * array[indexTauGrOne] + (1.0 - interpol) * array[indexTauGrOne - 1]
@@ -50,7 +55,7 @@ def main(**kwargs):
     output_filename = kwargs['output_filename']
     a = kwargs['a']
     data = athena_read.athdf(input_filename)
-    rho = data['rho'] 
+    rho = data['rho']
     rcoords = data['x1v']
     thcoords = data['x2v']
     thbord = data['x2f']
