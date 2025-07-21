@@ -9,8 +9,8 @@ import csv
 
 # kappa = 0.4 #in cgs
 eta = 0.06 #radiative 
-mdottarget = 0.1
-mdotcode = 0.0003*50
+mdottarget = 0.3
+mdotcode = 0.0004*50
 # solar_mass_cgs = 1.988e33
 # bh_mass_cgs = 5.0*solar_mass_cgs
 # g_cgs = 6.674e-8 #grav. constant in cgs
@@ -37,7 +37,7 @@ def getThetaTop(radiusInd, rho, rcoords, thcoords, thbord, a):
         diff = math.sqrt(a*a*costh*costh + radius*radius) * dtheta
 
         effRho = rho[0, thetaInd, radiusInd]
-        if effRho <= 1.0e-4:
+        if effRho <= 1.5e-4 * (radius**-1.5):
             effRho = 0
         prevTau = tau
         tau += tau_factor * effRho * diff
@@ -48,6 +48,8 @@ def getThetaTop(radiusInd, rho, rcoords, thcoords, thbord, a):
     return thetaInd, interpol
 
 def getFromBorderIndex(array, indexTauGrOne, interpol):
+    if indexTauGrOne == 0:
+        print("bad value")
     return interpol * array[indexTauGrOne] + (1.0 - interpol) * array[indexTauGrOne - 1]
 
 def main(**kwargs):
@@ -76,6 +78,7 @@ def main(**kwargs):
         # interpol = 0.5
         # heights in geometric units
         if thtop == -1:
+            #xs.append(rcoords[rInd])
             xs.append(math.sqrt(rcoords[rInd]**2 + a*a))
             ys.append(0.0)
             densities.append(0.0)
@@ -85,6 +88,7 @@ def main(**kwargs):
             u3.append(0.0)
         else:
             xs.append(math.sqrt(rcoords[rInd]**2 + a*a) * math.sin(getFromBorderIndex(thcoords, thtop, interpol)))
+            #xs.append(rcoords[rInd])
             ys.append(rcoords[rInd] * math.cos(getFromBorderIndex(thcoords, thtop, interpol)))
             densities.append(getFromBorderIndex(rho[0, :, rInd], thtop, interpol))
             u0.append(getFromBorderIndex(du0[0, :, rInd], thtop, interpol))
