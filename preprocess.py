@@ -9,7 +9,7 @@ output_file_path = "athinput.pp_master_project"
 
 time = 3e4
 outputdt = 10
-spin = 0.0
+spin = 0.5
 
 r_edge = 15.0
 r_peak = 30.0

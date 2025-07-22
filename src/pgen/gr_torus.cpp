@@ -71,6 +71,8 @@ Real IntegratedA1(Real x1_m, Real x1_p, Real x2, Real x3);
 Real IntegratedA2(Real x1, Real x2_m, Real x2_p, Real x3);
 Real IntegratedA3(Real x1, Real x2, Real x3_m, Real x3_p);
 void VectorPotential(Real x1, Real x2, Real x3, Real *p_a_1, Real *p_a_2, Real *p_a_3);
+void curlyF(Real x, Real x0, Real *out);
+void rhof(Real r, Real th, Real *rho);
 } // namespace
 
 // File variables
@@ -395,7 +397,6 @@ void MeshBlock::InitUserMeshBlockData(ParameterInput *pin) {
 //     Fishbone & Moncrief 1976, ApJ 207 962 (FM)
 //     Fishbone 1977, ApJ 215 323 (F)
 //   Assumes x3 is axisymmetric direction.
-
 void MeshBlock::ProblemGenerator(ParameterInput *pin) {
   // Prepare index bounds
   int il = is - NGHOST;
@@ -478,7 +479,9 @@ void MeshBlock::ProblemGenerator(ParameterInput *pin) {
         if (in_torus) {
           // Calculate thermodynamic variables
           Real pgas_over_rho = (gamma_adi - 1.0) / gamma_adi * std::expm1(log_h);
-          rho = rho_amp * std::pow(pgas_over_rho, 1.0 / (gamma_adi - 1.0));
+          //rho = std::pow(pgas_over_rho, 1.0 / (gamma_adi - 1.0));
+          rhof(r_bl, th_bl, &rho);
+          rho *= rho_amp;
           pgas = pgas_over_rho * rho;
 
           // Calculate velocities in Boyer-Lindquist coordinates
@@ -1741,3 +1744,41 @@ void VectorPotential(Real x1, Real x2, Real x3, Real *p_a_1, Real *p_a_2, Real *
   return;
 }
 } // namespace
+
+namespace {
+void curlyF(Real x, Real x0, Real *out){
+  Real as = a;
+  Real s1 = 2*std::cos(1/3.0*std::acos(as) - PI/3.0);
+  Real s2 = 2*std::cos(1/3.0*std::acos(as) + PI/3.0);
+  Real s3 = -2*std::cos(1/3.0*std::acos(as));
+  Real prefactor0 = 3/(2*x*x*(2*as+x*x*x-3*x));
+  Real prefactor1 = 3*SQR(s1-as)/(s1*(s1-s2)*(s1-s3));
+  Real prefactor2 = 3*SQR(s2-as)/(s2*(s2-s1)*(s2-s3));
+  Real prefactor3 = 3*SQR(s3-as)/(s3*(s3-s1)*(s3-s2));
+  Real ln0 = std::log(x/x0);
+  Real ln1 = std::log((x-s1)/(x0-s1));
+  Real ln2 = std::log((x-s2)/(x0-s2));
+  Real ln3 = std::log((x-s3)/(x0-s3));
+  Real term0 = x-x0-3/2.0*ln0;
+  Real term1 = -prefactor1*ln1;
+  Real term2 = -prefactor2*ln2;
+  Real term3 = -prefactor3*ln3;
+  Real combterm = term0+term1+term2+term3;
+  *out = prefactor0 * combterm;
+}
+}
+
+namespace {
+void rhof(Real r, Real theta, Real *rho){
+  Real theta0 = 0.001;
+  Real K = 0.1;
+  Real H = 0.05;
+  Real gam = gamma_adi;
+  Real x = std::sqrt(r);
+  Real x0 = std::sqrt(r_isco);
+  Real curlyf;
+  curlyF(x,x0,&curlyf);
+  Real rhoe =  std::pow(curlyf/r, 1/(4.0*(gam-1.0))) * std::pow(theta0/K, 1/(gam-1.0));
+  *rho = rhoe*std::exp(-4.0*SQR(std::cos(theta)) / SQR(H)) / (8.61384e-10);
+}
+}
