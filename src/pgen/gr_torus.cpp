@@ -484,7 +484,6 @@ void MeshBlock::ProblemGenerator(ParameterInput *pin) {
         // Overwrite primitives inside torus
         if (in_torus) {
           // Calculate thermodynamic variables
-          std::cout << "yes" << std::endl;
           rho = trho;
           rho *= rho_amp;
           pgas = pgas_over_rho * rho;
