@@ -72,7 +72,8 @@ Real IntegratedA2(Real x1, Real x2_m, Real x2_p, Real x3);
 Real IntegratedA3(Real x1, Real x2, Real x3_m, Real x3_p);
 void VectorPotential(Real x1, Real x2, Real x3, Real *p_a_1, Real *p_a_2, Real *p_a_3);
 void curlyF(Real x, Real x0, Real *out);
-void rhof(Real r, Real th, Real *rho);
+void rhof(Real r, Real th, Real pgas_over_rho, Real *rho);
+void pgas_over_rhof(Real r, Real log_h, Real *pgas_over_rho);
 } // namespace
 
 // File variables
@@ -474,13 +475,17 @@ void MeshBlock::ProblemGenerator(ParameterInput *pin) {
         Real uu1 = 0.0;
         Real uu2 = 0.0;
         Real uu3 = 0.0;
+        Real trho;
+        Real pgas_over_rho;
+        pgas_over_rhof(r,log_h,&pgas_over_rho);
+        rhof(r_bl, th_bl, pgas_over_rho, &trho);
+        in_torus = r_bl >= r_edge;
 
         // Overwrite primitives inside torus
         if (in_torus) {
           // Calculate thermodynamic variables
-          Real pgas_over_rho = (gamma_adi - 1.0) / gamma_adi * std::expm1(log_h);
-          //rho = std::pow(pgas_over_rho, 1.0 / (gamma_adi - 1.0));
-          rhof(r_bl, th_bl, &rho);
+          std::cout << "yes" << std::endl;
+          rho = trho;
           rho *= rho_amp;
           pgas = pgas_over_rho * rho;
 
@@ -1405,6 +1410,11 @@ void CalculateVelocityInTorus(Real r, Real sth, Real *p_ut, Real *p_uph) {
   Real u0 = -1.0 / g_00 * (g_03 * u3 + u0_b);
   *p_ut = u0;
   *p_uph = u3;
+
+  //thin disk:
+  Real x = std::sqrt(r);
+  *p_ut = (a + CUBE(x))/std::sqrt(CUBE(x)*(2*a+CUBE(x)-3*x));
+  *p_uph = 1/std::sqrt(CUBE(x)*(2*a+CUBE(x)-3*x));
   return;
 }
 } // namespace
@@ -1682,8 +1692,10 @@ void VectorPotential(Real x1, Real x2, Real x3, Real *p_a_1, Real *p_a_2, Real *
   }
 
   // Calculate thermodynamic variables
-  Real pgas_over_rho = (gamma_adi - 1.0) / gamma_adi * std::expm1(log_h);
-  Real rho = rho_amp * std::pow(pgas_over_rho, 1.0 / (gamma_adi - 1.0));
+  Real pgas_over_rho;// = (gamma_adi - 1.0) / gamma_adi * std::expm1(log_h);
+  pgas_over_rhof(r, log_h,&pgas_over_rho);
+  Real rho;// = rho_amp * std::pow(pgas_over_rho, 1.0 / (gamma_adi - 1.0));
+  rhof(r,th,pgas_over_rho,&rho);
   Real pgas = pgas_over_rho * rho;
 
   // Density isocontour configuration
@@ -1769,7 +1781,20 @@ void curlyF(Real x, Real x0, Real *out){
 }
 
 namespace {
-void rhof(Real r, Real theta, Real *rho){
+void pgas_over_rhof(Real r, Real log_h, Real *pgas_over_rho) {
+  //*pgas_over_rho = (gamma_adi - 1.0) / gamma_adi * std::expm1(log_h);
+  Real x = std::sqrt(r);
+  Real x0 = std::sqrt(r_isco);
+  Real curlyf;
+  curlyF(x,x0,&curlyf);
+  Real theta0 = 0.001;
+  *pgas_over_rho = theta0 * std::pow(curlyf/r, 1/4.0);
+}
+}
+
+namespace {
+void rhof(Real r, Real theta, Real pgas_over_rho, Real *rho){
+  //*rho=std::pow(pgas_over_rho, 1.0 / (gamma_adi - 1.0))
   Real theta0 = 0.001;
   Real K = 0.1;
   Real H = 0.05;
@@ -1779,6 +1804,6 @@ void rhof(Real r, Real theta, Real *rho){
   Real curlyf;
   curlyF(x,x0,&curlyf);
   Real rhoe =  std::pow(curlyf/r, 1/(4.0*(gam-1.0))) * std::pow(theta0/K, 1/(gam-1.0));
-  *rho = rhoe*std::exp(-4.0*SQR(std::cos(theta)) / SQR(H)) / (8.61384e-10);
+  *rho = rhoe*std::exp(-4.0*SQR(std::cos(theta)) / SQR(H));
 }
 }
