@@ -1803,6 +1803,6 @@ void rhof(Real r, Real theta, Real pgas_over_rho, Real *rho){
   Real curlyf;
   curlyF(x,x0,&curlyf);
   Real rhoe =  std::pow(curlyf/r, 1/(4.0*(gam-1.0))) * std::pow(theta0/K, 1/(gam-1.0));
-  *rho = rhoe*std::exp(-4.0*SQR(std::cos(theta)) / SQR(H));
+  *rho = 1.0/0.07*1e2*rhoe*std::exp(-4.0*SQR(std::cos(theta)) / SQR(H));
 }
 }
