@@ -73,7 +73,9 @@ Real IntegratedA3(Real x1, Real x2, Real x3_m, Real x3_p);
 void VectorPotential(Real x1, Real x2, Real x3, Real *p_a_1, Real *p_a_2, Real *p_a_3);
 void curlyF(Real x, Real x0, Real *out);
 void rhof(Real r, Real th, Real pgas_over_rho, Real *rho);
+void rhofraw(Real r, Real theta, Real pgas_over_rho, Real *rho);
 void pgas_over_rhof(Real r, Real log_h, Real *pgas_over_rho);
+void rhoMaxf(Coordinates *pcoord, Real *rhomax);
 } // namespace
 
 // File variables
@@ -259,7 +261,9 @@ void Mesh::InitUserMeshData(ParameterInput *pin) {
   log_h_edge = LogHAux(r_edge, 1.0);
   log_h_peak = LogHAux(r_peak, 1.0) - log_h_edge;
   pgas_over_rho_peak = (gamma_adi - 1.0) / gamma_adi * std::expm1(log_h_peak);
-  rho_amp = rho_max / std::pow(pgas_over_rho_peak, 1.0 / (gamma_adi - 1.0));
+  //rho_amp = rho_max / std::pow(pgas_over_rho_peak, 1.0 / (gamma_adi - 1.0));
+  rhoMaxf(nullptr, &rho_amp);
+  rho_amp = 1.0/rho_amp;
   sin_tilt = std::sin(tilt);
   cos_tilt = std::cos(tilt);
 
@@ -1695,6 +1699,7 @@ void VectorPotential(Real x1, Real x2, Real x3, Real *p_a_1, Real *p_a_2, Real *
   pgas_over_rhof(r, log_h,&pgas_over_rho);
   Real rho;// = rho_amp * std::pow(pgas_over_rho, 1.0 / (gamma_adi - 1.0));
   rhof(r,th,pgas_over_rho,&rho);
+  rho = rho * rho_amp;
   Real pgas = pgas_over_rho * rho;
 
   // Density isocontour configuration
@@ -1793,6 +1798,10 @@ void pgas_over_rhof(Real r, Real log_h, Real *pgas_over_rho) {
 
 namespace {
 void rhof(Real r, Real theta, Real pgas_over_rho, Real *rho){
+  rhofraw(r, theta, pgas_over_rho, rho);
+  //*rho=*rho/rho_max;
+}
+void rhofraw(Real r, Real theta, Real pgas_over_rho, Real *rho){
   //*rho=std::pow(pgas_over_rho, 1.0 / (gamma_adi - 1.0))
   Real theta0 = 0.001;
   Real K = 0.1;
@@ -1802,7 +1811,28 @@ void rhof(Real r, Real theta, Real pgas_over_rho, Real *rho){
   Real x0 = std::sqrt(r_isco);
   Real curlyf;
   curlyF(x,x0,&curlyf);
-  Real rhoe =  std::pow(curlyf/r, 1/(4.0*(gam-1.0))) * std::pow(theta0/K, 1/(gam-1.0));
-  *rho = 1.0/0.07*1e2*rhoe*std::exp(-4.0*SQR(std::cos(theta)) / SQR(H));
+  Real rhoe = std::pow(curlyf/r, 1/(4.0*(gam-1.0))) * std::pow(theta0/K, 1/(gam-1.0));
+  *rho = rhoe*std::exp(-4.0*SQR(std::cos(theta)) / SQR(H));
+}
+}
+
+// Only for modified initial conditions
+namespace {
+//consider rho_amp
+void rhoMaxf(Coordinates *pcoord, Real *rhomax){
+  Real dif = 100.0;//r_peak - r_edge;
+  int its = 20000;
+  Real dd = dif/its;
+  Real max = 0.0;
+  for(int i=0; i<its; i++){
+    Real r = i*dd;
+
+    if(r < r_edge) continue;
+    Real rho;
+    rhofraw(r,M_PI_2,0.0, &rho);
+    max = std::max(rho,max);
+  }
+  std::cout << max << std::endl;
+  *rhomax=max;
 }
 }
