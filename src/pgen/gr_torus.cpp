@@ -263,6 +263,7 @@ void Mesh::InitUserMeshData(ParameterInput *pin) {
   pgas_over_rho_peak = (gamma_adi - 1.0) / gamma_adi * std::expm1(log_h_peak);
   //rho_amp = rho_max / std::pow(pgas_over_rho_peak, 1.0 / (gamma_adi - 1.0));
   rhoMaxf(nullptr, &rho_amp);
+  rho_amp*=1.2;
   rho_amp = 1.0/rho_amp;
   sin_tilt = std::sin(tilt);
   cos_tilt = std::cos(tilt);
@@ -1705,7 +1706,7 @@ void VectorPotential(Real x1, Real x2, Real x3, Real *p_a_1, Real *p_a_2, Real *
   // Density isocontour configuration
   Real a_r, a_th_t, a_ph_t;
   if (field_config == MagneticFieldConfigs::density) {
-    Real rho_cut = std::max(rho - pot_rho_cutoff, static_cast<Real>(0.0));
+    Real rho_cut = 0.1;//std::max(rho - pot_rho_cutoff, static_cast<Real>(0.0));
     a_r = 0.0;
     a_th_t = 0.0;
     a_ph_t = std::pow(rho_cut, pot_rho_pow) * std::pow(r, pot_r_pow);
