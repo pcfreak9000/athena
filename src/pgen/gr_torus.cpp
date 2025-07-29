@@ -35,6 +35,11 @@
 #error "This problem generator must be used with general relativity"
 #endif
 
+#define THINDISK
+#define COOLING_MULT 1.0
+#define THETA0 0.001
+#define K_ENTROPY 0.1
+#define H_ASPECT 0.05
 // Declarations
 enum class MagneticFieldConfigs {density, loops};
 void InflowBoundary(MeshBlock *pmb, Coordinates *pcoord, AthenaArray<Real> &prim,
@@ -75,7 +80,7 @@ void curlyF(Real x, Real x0, Real *out);
 void rhof(Real r, Real th, Real pgas_over_rho, Real *rho);
 void rhofraw(Real r, Real theta, Real pgas_over_rho, Real *rho);
 void pgas_over_rhof(Real r, Real log_h, Real *pgas_over_rho);
-void rhoMaxf(Coordinates *pcoord, Real *rhomax);
+void rhoMaxf(Mesh *pmy_mesh, Real *rhomax);
 } // namespace
 
 // File variables
@@ -261,10 +266,13 @@ void Mesh::InitUserMeshData(ParameterInput *pin) {
   log_h_edge = LogHAux(r_edge, 1.0);
   log_h_peak = LogHAux(r_peak, 1.0) - log_h_edge;
   pgas_over_rho_peak = (gamma_adi - 1.0) / gamma_adi * std::expm1(log_h_peak);
-  //rho_amp = rho_max / std::pow(pgas_over_rho_peak, 1.0 / (gamma_adi - 1.0));
-  rhoMaxf(nullptr, &rho_amp);
-  rho_amp*=1.2;
-  rho_amp = 1.0/rho_amp;
+
+#ifdef THINDISK
+
+#else
+  rho_amp = rho_max / std::pow(pgas_over_rho_peak, 1.0 / (gamma_adi - 1.0));
+#endif
+
   sin_tilt = std::sin(tilt);
   cos_tilt = std::cos(tilt);
 
@@ -295,6 +303,7 @@ void Mesh::UserWorkAfterLoop(ParameterInput *pin) {
 //   User arrays are metric and its inverse.
 
 void MeshBlock::InitUserMeshBlockData(ParameterInput *pin) {
+
 
   // Allocate space for user output variables
   if (MAGNETIC_FIELDS_ENABLED) {
@@ -419,6 +428,9 @@ void MeshBlock::ProblemGenerator(ParameterInput *pin) {
     kl -= NGHOST;
     ku += NGHOST;
   }
+  rhoMaxf(pmy_mesh, &rho_amp);
+      //rho_amp*=1.2;
+  rho_amp = 1.0/rho_amp;
 
   // Prepare scratch arrays
   AthenaArray<Real> &g = ruser_meshblock_data[0];
@@ -433,7 +445,6 @@ void MeshBlock::ProblemGenerator(ParameterInput *pin) {
         Real x1 = pcoord->x1v(i);
         Real x2 = pcoord->x2v(j);
         Real x3 = pcoord->x3v(k);
-
         // Calculate spherical Kerr-Schild coordinates of cell
         Real r, th, ph;
         GetKerrSchildCoordinates(x1, x2, x3, &r, &th, &ph);
@@ -484,8 +495,9 @@ void MeshBlock::ProblemGenerator(ParameterInput *pin) {
         Real pgas_over_rho;
         pgas_over_rhof(r,log_h,&pgas_over_rho);
         rhof(r_bl, th_bl, pgas_over_rho, &trho);
+#ifdef THINDISK
         in_torus = r_bl >= r_edge;
-
+#endif
         // Overwrite primitives inside torus
         if (in_torus) {
           // Calculate thermodynamic variables
@@ -1061,7 +1073,6 @@ void Cooling(MeshBlock *pmb, const Real time, const Real dt,
   for (int k = ks; k <= ke; ++k) {
     for (int j = js; j <= je; ++j) {
       for (int i = is; i <= ie; ++i) {
-
         Real x = pmb->pcoord->x1v(i);
         Real y = pmb->pcoord->x2v(j);
         Real z = pmb->pcoord->x3v(k);
@@ -1108,7 +1119,6 @@ void Cooling(MeshBlock *pmb, const Real time, const Real dt,
 
         Real tau_cool = 2 * M_PI / omega_k ;
         Real K_c = pgas_min / pow(rho_min, gamma_adi);
-#define COOLING_MULT 1.0
         //Real shape_theta = exp(-1*pow((th - (M_PI/2)),2) / (2*theta_nocool*theta_nocool));
         Real shape_theta = exp(-1*SQR(th - (M_PI/2.0)) / (2.0 * SQR(theta_nocool)));
         Real lnKkc = log(COOLING_MULT * K / K_c);
@@ -1388,6 +1398,11 @@ Real LogHAux(Real r, Real sth) {
 
 namespace {
 void CalculateVelocityInTorus(Real r, Real sth, Real *p_ut, Real *p_uph) {
+#ifdef THINDISK
+  Real x = std::sqrt(r);
+  *p_ut = (a + CUBE(x))/std::sqrt(CUBE(x)*(2*a+CUBE(x)-3*x));
+  *p_uph = 1/std::sqrt(CUBE(x)*(2*a+CUBE(x)-3*x));
+#else
   Real sth2 = SQR(sth);
   Real cth2 = 1.0 - sth2;
   Real delta = SQR(r) - 2.0 * m * r + SQR(a);                // \Delta
@@ -1414,11 +1429,7 @@ void CalculateVelocityInTorus(Real r, Real sth, Real *p_ut, Real *p_uph) {
   Real u0 = -1.0 / g_00 * (g_03 * u3 + u0_b);
   *p_ut = u0;
   *p_uph = u3;
-
-  //thin disk:
-  Real x = std::sqrt(r);
-  *p_ut = (a + CUBE(x))/std::sqrt(CUBE(x)*(2*a+CUBE(x)-3*x));
-  *p_uph = 1/std::sqrt(CUBE(x)*(2*a+CUBE(x)-3*x));
+#endif
   return;
 }
 } // namespace
@@ -1680,6 +1691,9 @@ void VectorPotential(Real x1, Real x2, Real x3, Real *p_a_1, Real *p_a_2, Real *
     *p_a_3 = 0.0;
     return;
   }
+
+#ifdef THINDISK
+#else
   Real log_h = LogHAux(r_bl, sth_bl_t) - log_h_edge;  // (FM 3.6)
   if (log_h < 0.0) {
     *p_a_1 = 0.0;
@@ -1755,10 +1769,10 @@ void VectorPotential(Real x1, Real x2, Real x3, Real *p_a_1, Real *p_a_2, Real *
   a_r *= pot_amp;
   a_th *= pot_amp;
   a_ph *= pot_amp;
-
   // Transform to preferred coordinates
   TransformCovariantFromKerrSchild(a_r, a_th, a_ph, x1, x2, x3, p_a_1, p_a_2, p_a_3);
   return;
+#endif
 }
 } // namespace
 
@@ -1776,7 +1790,7 @@ void curlyF(Real x, Real x0, Real *out){
   Real ln1 = std::log((x-s1)/(x0-s1));
   Real ln2 = std::log((x-s2)/(x0-s2));
   Real ln3 = std::log((x-s3)/(x0-s3));
-  Real term0 = x-x0-3/2.0*ln0;
+  Real term0 = x-x0-3.0/2.0*ln0;
   Real term1 = -prefactor1*ln1;
   Real term2 = -prefactor2*ln2;
   Real term3 = -prefactor3*ln3;
@@ -1787,53 +1801,64 @@ void curlyF(Real x, Real x0, Real *out){
 
 namespace {
 void pgas_over_rhof(Real r, Real log_h, Real *pgas_over_rho) {
-  //*pgas_over_rho = (gamma_adi - 1.0) / gamma_adi * std::expm1(log_h);
+#ifdef THINDISK
   Real x = std::sqrt(r);
   Real x0 = std::sqrt(r_isco);
   Real curlyf;
   curlyF(x,x0,&curlyf);
-  Real theta0 = 0.001;
-  *pgas_over_rho = theta0 * std::pow(curlyf/r, 1/4.0);
+  *pgas_over_rho = THETA0 * std::pow(curlyf/r, 1/4.0);
+#else
+  *pgas_over_rho = (gamma_adi - 1.0) / gamma_adi * std::expm1(log_h);
+#endif
 }
 }
 
 namespace {
 void rhof(Real r, Real theta, Real pgas_over_rho, Real *rho){
   rhofraw(r, theta, pgas_over_rho, rho);
-  //*rho=*rho/rho_max;
 }
 void rhofraw(Real r, Real theta, Real pgas_over_rho, Real *rho){
-  //*rho=std::pow(pgas_over_rho, 1.0 / (gamma_adi - 1.0))
-  Real theta0 = 0.001;
-  Real K = 0.1;
-  Real H = 0.05;
+#ifdef THINDISK
   Real gam = gamma_adi;
   Real x = std::sqrt(r);
   Real x0 = std::sqrt(r_isco);
   Real curlyf;
   curlyF(x,x0,&curlyf);
-  Real rhoe = std::pow(curlyf/r, 1/(4.0*(gam-1.0))) * std::pow(theta0/K, 1/(gam-1.0));
-  *rho = rhoe*std::exp(-4.0*SQR(std::cos(theta)) / SQR(H));
+  Real rhoe = std::pow(curlyf/r, 1/(4.0*(gam-1.0))) * std::pow(THETA0/K_ENTROPY, 1/(gam-1.0));
+  *rho = rhoe*std::exp(-4.0*SQR(std::cos(theta)) / SQR(H_ASPECT));
+#else
+  *rho=std::pow(pgas_over_rho, 1.0 / (gamma_adi - 1.0));
+#endif
 }
 }
 
 // Only for modified initial conditions
 namespace {
-//consider rho_amp
-void rhoMaxf(Coordinates *pcoord, Real *rhomax){
-  Real dif = 100.0;//r_peak - r_edge;
-  int its = 20000;
-  Real dd = dif/its;
+void rhoMaxf(Mesh *pmy_mesh, Real *rhomax){
+  int mbs = pmy_mesh->my_blocks.GetSize();
   Real max = 0.0;
-  for(int i=0; i<its; i++){
-    Real r = i*dd;
+  for(int a = 0; a<mbs; a++){
+    MeshBlock* mb = pmy_mesh->my_blocks(a);
+    Coordinates* coords = mb->pcoord;
+    int is = mb->is;
+    int ie = mb->ie;
+    int js = mb->js;
+    int je = mb->je;
+    for(int j=0; j<coords->x2v.GetSize(); j++){
+      Real x2 = coords->x2v(j);
+      for(int i=0; i<coords->x1v.GetSize(); i++){
+        Real x1 = coords->x1v(i);
+        Real r, th, ph;
+        GetKerrSchildCoordinates(x1, x2, 0.0, &r, &th, &ph);
 
-    if(r < r_edge) continue;
-    Real rho;
-    rhofraw(r,M_PI_2,0.0, &rho);
-    max = std::max(rho,max);
+        if (r < r_edge) continue;
+        Real rho;
+        rhofraw(r,th, 0.0, &rho);
+        max = rho > max ? rho : max;
+        //max = std::max(rho,max);
+      }
+    }
   }
-  std::cout << max << std::endl;
-  *rhomax=max;
+  *rhomax=max;//1e-11;
 }
 }

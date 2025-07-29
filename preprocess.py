@@ -7,16 +7,17 @@ import math
 input_file_path = "prefab-athinput.master_project"
 output_file_path = "athinput.pp_master_project"
 
-time = 3e3
+time = 9e3
 outputdt = 10
 spin = 0.5
 
-r_edge = 2.0
+r_edge = 6.0
 r_peak = 30.0
 
 th_nocool = 0.1
 mass = 1.0 #per recommendation, we leave this at 1
 horizon = mass * (1.0 + math.sqrt(1.0 - (spin/mass)**2))
+#r_edge = horizon
 actualtime = time * mass
 actualdt = outputdt * mass
 #ISCO is calculated in modified AthenaPP problem generator
