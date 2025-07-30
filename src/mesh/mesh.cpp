@@ -1632,6 +1632,15 @@ void Mesh::Initialize(int res_flag, ParameterInput *pin) {
         pmb->ProblemGenerator(pin);
         pmb->pbval->CheckUserBoundaries();
       }
+
+#ifdef POSTPROBLEMGENERATOR
+#pragma omp parallel for num_threads(nthreads)
+      for (int i=0; i<nblocal; ++i) {
+        MeshBlock *pmb = my_blocks(i);
+        pmb->PostProblemGenerator(pin);
+        pmb->pbval->CheckUserBoundaries();//not sure if this is useful again, but we do modify stuff in postproblemgenerator...
+      }
+#endif
     }
 
     // add initial perturbation for decaying or impulsive turbulence

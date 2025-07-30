@@ -11,6 +11,8 @@
 //! The Mesh is the overall grid structure, and MeshBlocks are local patches of data
 //! (potentially on different levels) that tile the entire domain.
 
+#define POSTPROBLEMGENERATOR
+
 // C headers
 
 // C++ headers
@@ -190,6 +192,9 @@ class MeshBlock {
 
   //! defined in either the prob file or default_pgen.cpp in ../pgen/
   void ProblemGenerator(ParameterInput *pin);
+#ifdef POSTPROBLEMGENERATOR
+  void PostProblemGenerator(ParameterInput *pin);
+#endif
   void InitUserMeshBlockData(ParameterInput *pin);
 
   // functions and variables for automatic load balancing based on timing

@@ -40,6 +40,7 @@
 #define THETA0 0.001
 #define K_ENTROPY 0.1
 #define H_ASPECT 0.05
+#define M_PARAM 0.0
 // Declarations
 enum class MagneticFieldConfigs {density, loops};
 void InflowBoundary(MeshBlock *pmb, Coordinates *pcoord, AthenaArray<Real> &prim,
@@ -267,9 +268,7 @@ void Mesh::InitUserMeshData(ParameterInput *pin) {
   log_h_peak = LogHAux(r_peak, 1.0) - log_h_edge;
   pgas_over_rho_peak = (gamma_adi - 1.0) / gamma_adi * std::expm1(log_h_peak);
 
-#ifdef THINDISK
-
-#else
+#ifndef THINDISK
   rho_amp = rho_max / std::pow(pgas_over_rho_peak, 1.0 / (gamma_adi - 1.0));
 #endif
 
@@ -428,10 +427,11 @@ void MeshBlock::ProblemGenerator(ParameterInput *pin) {
     kl -= NGHOST;
     ku += NGHOST;
   }
+#ifdef THINDISK
   rhoMaxf(pmy_mesh, &rho_amp);
       //rho_amp*=1.2;
   rho_amp = 1.0/rho_amp;
-
+#endif
   // Prepare scratch arrays
   AthenaArray<Real> &g = ruser_meshblock_data[0];
   AthenaArray<Real> &gi = ruser_meshblock_data[1];
@@ -625,6 +625,39 @@ void MeshBlock::ProblemGenerator(ParameterInput *pin) {
   UserWorkInLoop();
   return;
 }
+#ifdef POSTPROBLEMGENERATOR
+void MeshBlock::PostProblemGenerator(ParameterInput* pin){
+  // Prepare index bounds
+  int il = is - NGHOST;
+  int iu = ie + NGHOST;
+  int jl = js;
+  int ju = je;
+  if (block_size.nx2 > 1) {
+    jl -= NGHOST;
+    ju += NGHOST;
+  }
+  int kl = ks;
+  int ku = ke;
+  if (block_size.nx3 > 1) {
+    kl -= NGHOST;
+    ku += NGHOST;
+  }
+  for (int k = kl; k <= ku; ++k) {
+    for (int j = jl; j <= ju; ++j) {
+      for (int i = il; i <= iu; ++i) {
+        //calc B_sq using formula from UserWorkInLoop
+        //find max B_sq over all meshblocks
+
+        //calculate four-B-field in this cell for face centered magnetic fields
+        //renormalize B_field with sqrt(B_sq)_new/sqrt(B_sq)_old
+        //calculate projected three-B-field from projection,put it back into the array???
+        //recalculate the cell centered field
+        //redo PrimitiveToConserved?
+      }
+    }
+  }
+}
+#endif
 
 //----------------------------------------------------------------------------------------
 // Function responsible for storing history quantities for output
@@ -1691,8 +1724,19 @@ void VectorPotential(Real x1, Real x2, Real x3, Real *p_a_1, Real *p_a_2, Real *
     *p_a_3 = 0.0;
     return;
   }
+  Real a_r, a_th_t, a_ph_t;
 
 #ifdef THINDISK
+  Real pref = std::pow(r*sth, 3.0/4.0);
+  Real tanth = 1.0/SQR(std::tan(th - M_PI_2));
+  Real mpow = std::pow(M_PARAM, 5.0/4.0);
+  Real frac = mpow/std::pow(SQR(M_PARAM)+tanth, 5.0/8.0);
+  Real Aphi = pref * frac;
+  a_r = 0.0;
+  a_th_t = 0.0;
+  a_ph_t = Aphi;
+
+  //do we have to transform this to covariant kerr schild??
 #else
   Real log_h = LogHAux(r_bl, sth_bl_t) - log_h_edge;  // (FM 3.6)
   if (log_h < 0.0) {
@@ -1718,7 +1762,6 @@ void VectorPotential(Real x1, Real x2, Real x3, Real *p_a_1, Real *p_a_2, Real *
   Real pgas = pgas_over_rho * rho;
 
   // Density isocontour configuration
-  Real a_r, a_th_t, a_ph_t;
   if (field_config == MagneticFieldConfigs::density) {
     Real rho_cut = std::max(rho - pot_rho_cutoff, static_cast<Real>(0.0));
     a_r = 0.0;
@@ -1743,6 +1786,7 @@ void VectorPotential(Real x1, Real x2, Real x3, Real *p_a_1, Real *p_a_2, Real *
     *p_a_3 = NAN;
     return;
   }
+#endif
 
   // Account for tilt
   Real a_th, a_ph;
@@ -1772,7 +1816,6 @@ void VectorPotential(Real x1, Real x2, Real x3, Real *p_a_1, Real *p_a_2, Real *
   // Transform to preferred coordinates
   TransformCovariantFromKerrSchild(a_r, a_th, a_ph, x1, x2, x3, p_a_1, p_a_2, p_a_3);
   return;
-#endif
 }
 } // namespace
 
