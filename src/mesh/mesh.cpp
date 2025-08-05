@@ -1637,6 +1637,11 @@ void Mesh::Initialize(int res_flag, ParameterInput *pin) {
 #pragma omp parallel for num_threads(nthreads)
       for (int i=0; i<nblocal; ++i) {
         MeshBlock *pmb = my_blocks(i);
+        pmb->FindMax(pin);
+      }
+#pragma omp parallel for num_threads(nthreads)
+      for (int i=0; i<nblocal; ++i) {
+        MeshBlock *pmb = my_blocks(i);
         pmb->PostProblemGenerator(pin);
         pmb->pbval->CheckUserBoundaries();//not sure if this is useful again, but we do modify stuff in postproblemgenerator...
       }

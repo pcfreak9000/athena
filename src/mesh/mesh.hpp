@@ -193,6 +193,7 @@ class MeshBlock {
   //! defined in either the prob file or default_pgen.cpp in ../pgen/
   void ProblemGenerator(ParameterInput *pin);
 #ifdef POSTPROBLEMGENERATOR
+  void FindMax(ParameterInput *pin);
   void PostProblemGenerator(ParameterInput *pin);
 #endif
   void InitUserMeshBlockData(ParameterInput *pin);
