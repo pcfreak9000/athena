@@ -27,7 +27,7 @@ if [ "$BINAC2" ]; then
     #module list
     python configure.py -g -b -mpi --prob gr_torus --coord=kerr-schild --flux hlle --nghost 4 -hdf5 --hdf5_path="$HDF5_HOME"
 else
-    python configure.py -g -b -omp --prob gr_torus --coord=kerr-schild --flux hlle --nghost 4 -hdf5
+    python configure.py -debug -g -b -omp --prob gr_torus --coord=kerr-schild --flux hlle --nghost 4 -hdf5
 fi
 
 if [ -n "$P9000_WORKER_THREADS" ]; then

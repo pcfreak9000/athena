@@ -622,7 +622,6 @@ void MeshBlock::ProblemGenerator(ParameterInput *pin) {
   }
 
 #ifndef POSTPROBLEMGENERATOR
-
   // Initialize conserved values
   peos->PrimitiveToConserved(phydro->w, pfield->bcc, phydro->u, pcoord, il, iu, jl, ju,
       kl, ku);
@@ -645,6 +644,8 @@ void MeshBlock::FindMax(ParameterInput *pin) {
   for(int a = 0; a<mbs; a++){
     MeshBlock* mb = pmy_mesh->my_blocks(a);
     Coordinates* coords = mb->pcoord;
+    Hydro* phydro = mb->phydro;
+    Field* pfield = mb->pfield;
     int is = mb->is;
     int ie = mb->ie;
     int js = mb->js;
@@ -655,7 +656,7 @@ void MeshBlock::FindMax(ParameterInput *pin) {
       for(int i=0; i<coords->x1v.GetSize(); i++){
 
         Real pg = phydro->w(IPR,k,j,i);
-        maxgas = maxgas > pg ? maxgas : pg;
+        if(pg > maxgas) maxgas = pg;
         // Calculate normal-frame Lorentz factor
         Real uu1 = phydro->w(IVX,k,j,i);
         Real uu2 = phydro->w(IVY,k,j,i);
@@ -672,7 +673,7 @@ void MeshBlock::FindMax(ParameterInput *pin) {
         Real u2 = uu2 - alpha * gamma * gi(I02,i);
         Real u3 = uu3 - alpha * gamma * gi(I03,i);
         Real u_0, u_1, u_2, u_3;
-        pcoord->LowerVectorCell(u0, u1, u2, u3, k, j, i, &u_0, &u_1, &u_2, &u_3);
+        coords->LowerVectorCell(u0, u1, u2, u3, k, j, i, &u_0, &u_1, &u_2, &u_3);
 
         // Calculate 4-magnetic field
         Real bb1 = 0.0, bb2 = 0.0, bb3 = 0.0;
@@ -690,12 +691,12 @@ void MeshBlock::FindMax(ParameterInput *pin) {
           b1 = (bb1 + b0 * u1) / u0;
           b2 = (bb2 + b0 * u2) / u0;
           b3 = (bb3 + b0 * u3) / u0;
-          pcoord->LowerVectorCell(b0, b1, b2, b3, k, j, i, &b_0, &b_1, &b_2, &b_3);
+          coords->LowerVectorCell(b0, b1, b2, b3, k, j, i, &b_0, &b_1, &b_2, &b_3);
         }
 
         // Calculate magnetic pressure
         Real b_sq = b0 * b_0 + b1 * b_1 + b2 * b_2 + b3 * b_3;
-        max = max > b_sq ? max : b_sq;
+        if (b_sq > max) max = b_sq;
       }
     }
     }
@@ -2005,8 +2006,7 @@ void rhoMaxf(Mesh *pmy_mesh, Real *rhomax){
         if (r < r_edge) continue;
         Real rho;
         rhofraw(r,th, 0.0, &rho);
-        max = rho > max ? rho : max;
-        //max = std::max(rho,max);
+        if(rho > max) max=rho;
       }
     }
   }
