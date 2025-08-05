@@ -503,9 +503,11 @@ void MeshBlock::ProblemGenerator(ParameterInput *pin) {
         // Overwrite primitives inside torus
         if (in_torus) {
           // Calculate thermodynamic variables
-          rho = trho;
-          rho *= rho_amp;
-          pgas = pgas_over_rho * rho;
+          if(trho * rho_amp > rho)
+            rho = trho * rho_amp;
+
+          if(pgas_over_rho * rho > pgas)
+            pgas = pgas_over_rho * rho;
 
           // Calculate velocities in Boyer-Lindquist coordinates
           Real u0_bl, u1_bl, u2_bl, u3_bl;
@@ -651,54 +653,54 @@ void MeshBlock::FindMax(ParameterInput *pin) {
     int js = mb->js;
     int je = mb->je;
     for(int k=0; k<coords->x3v.GetSize(); k++){
-    for(int j=0; j<coords->x2v.GetSize(); j++){
-      coords->CellMetric(k, j, 0, coords->x1v.GetSize()-1, g, gi);
-      for(int i=0; i<coords->x1v.GetSize(); i++){
+      for(int j=0; j<coords->x2v.GetSize(); j++){
+        coords->CellMetric(k, j, 0, coords->x1v.GetSize()-1, g, gi);
+        for(int i=0; i<coords->x1v.GetSize(); i++){
 
-        Real pg = phydro->w(IPR,k,j,i);
-        if(pg > maxgas) maxgas = pg;
-        // Calculate normal-frame Lorentz factor
-        Real uu1 = phydro->w(IVX,k,j,i);
-        Real uu2 = phydro->w(IVY,k,j,i);
-        Real uu3 = phydro->w(IVZ,k,j,i);
-        Real tmp = g(I11,i) * SQR(uu1) + 2.0 * g(I12,i) * uu1 * uu2
-            + 2.0 * g(I13,i) * uu1 * uu3 + g(I22,i) * SQR(uu2)
-            + 2.0 * g(I23,i) * uu2 * uu3 + g(I33,i) * SQR(uu3);
-        Real gamma = std::sqrt(1.0 + tmp);
+          Real pg = phydro->w(IPR,k,j,i);
+          if(pg > maxgas) maxgas = pg;
+          // Calculate normal-frame Lorentz factor
+          Real uu1 = phydro->w(IVX,k,j,i);
+          Real uu2 = phydro->w(IVY,k,j,i);
+          Real uu3 = phydro->w(IVZ,k,j,i);
+          Real tmp = g(I11,i) * SQR(uu1) + 2.0 * g(I12,i) * uu1 * uu2
+              + 2.0 * g(I13,i) * uu1 * uu3 + g(I22,i) * SQR(uu2)
+              + 2.0 * g(I23,i) * uu2 * uu3 + g(I33,i) * SQR(uu3);
+          Real gamma = std::sqrt(1.0 + tmp);
 
-        // Calculate 4-velocity
-        Real alpha = std::sqrt(-1.0 / gi(I00,i));
-        Real u0 = gamma / alpha;
-        Real u1 = uu1 - alpha * gamma * gi(I01,i);
-        Real u2 = uu2 - alpha * gamma * gi(I02,i);
-        Real u3 = uu3 - alpha * gamma * gi(I03,i);
-        Real u_0, u_1, u_2, u_3;
-        coords->LowerVectorCell(u0, u1, u2, u3, k, j, i, &u_0, &u_1, &u_2, &u_3);
+          // Calculate 4-velocity
+          Real alpha = std::sqrt(-1.0 / gi(I00,i));
+          Real u0 = gamma / alpha;
+          Real u1 = uu1 - alpha * gamma * gi(I01,i);
+          Real u2 = uu2 - alpha * gamma * gi(I02,i);
+          Real u3 = uu3 - alpha * gamma * gi(I03,i);
+          Real u_0, u_1, u_2, u_3;
+          coords->LowerVectorCell(u0, u1, u2, u3, k, j, i, &u_0, &u_1, &u_2, &u_3);
 
-        // Calculate 4-magnetic field
-        Real bb1 = 0.0, bb2 = 0.0, bb3 = 0.0;
-        Real b0 = 0.0, b1 = 0.0, b2 = 0.0, b3 = 0.0;
-        Real b_0 = 0.0, b_1 = 0.0, b_2 = 0.0, b_3 = 0.0;
-        if (MAGNETIC_FIELDS_ENABLED) {
-          //TOD- consider using b.x123f instead of bcc?
-//          bb1 = pfield->bcc(IB1,k,j,i);
-//          bb2 = pfield->bcc(IB2,k,j,i);
-//          bb3 = pfield->bcc(IB3,k,j,i);
-          bb1 = pfield->b.x1f(k,j,i);
-          bb2 = pfield->b.x2f(k,j,i);
-          bb3 = pfield->b.x3f(k,j,i);
-          b0 = u_1 * bb1 + u_2 * bb2 + u_3 * bb3;
-          b1 = (bb1 + b0 * u1) / u0;
-          b2 = (bb2 + b0 * u2) / u0;
-          b3 = (bb3 + b0 * u3) / u0;
-          coords->LowerVectorCell(b0, b1, b2, b3, k, j, i, &b_0, &b_1, &b_2, &b_3);
+          // Calculate 4-magnetic field
+          Real bb1 = 0.0, bb2 = 0.0, bb3 = 0.0;
+          Real b0 = 0.0, b1 = 0.0, b2 = 0.0, b3 = 0.0;
+          Real b_0 = 0.0, b_1 = 0.0, b_2 = 0.0, b_3 = 0.0;
+          if (MAGNETIC_FIELDS_ENABLED) {
+            //TOD- consider using b.x123f instead of bcc?
+  //          bb1 = pfield->bcc(IB1,k,j,i);
+  //          bb2 = pfield->bcc(IB2,k,j,i);
+  //          bb3 = pfield->bcc(IB3,k,j,i);
+            bb1 = pfield->b.x1f(k,j,i);
+            bb2 = pfield->b.x2f(k,j,i);
+            bb3 = pfield->b.x3f(k,j,i);
+            b0 = u_1 * bb1 + u_2 * bb2 + u_3 * bb3;
+            b1 = (bb1 + b0 * u1) / u0;
+            b2 = (bb2 + b0 * u2) / u0;
+            b3 = (bb3 + b0 * u3) / u0;
+            coords->LowerVectorCell(b0, b1, b2, b3, k, j, i, &b_0, &b_1, &b_2, &b_3);
+          }
+
+          // Calculate magnetic pressure
+          Real b_sq = b0 * b_0 + b1 * b_1 + b2 * b_2 + b3 * b_3;
+          if (b_sq > max) max = b_sq;
         }
-
-        // Calculate magnetic pressure
-        Real b_sq = b0 * b_0 + b1 * b_1 + b2 * b_2 + b3 * b_3;
-        if (b_sq > max) max = b_sq;
       }
-    }
     }
   }
   b_sq_max = max;
@@ -1826,17 +1828,15 @@ void VectorPotential(Real x1, Real x2, Real x3, Real *p_a_1, Real *p_a_2, Real *
     sth_bl_t = std::hypot(x_bl_t, y_bl_t);
   }
 
-  // Determine if we are in the magnetized torus
-  if (r_bl < r_edge) {
-    *p_a_1 = 0.0;
-    *p_a_2 = 0.0;
-    *p_a_3 = 0.0;
-    return;
-  }
+
   Real a_r, a_th_t, a_ph_t;
 
 #ifdef THINDISK
-  Real pref = std::pow(r*sth, 3.0/4.0);
+  Real r_eff = r_bl;
+//  if(r_bl < r_edge){
+//    r_eff = r_edge;
+//  }
+  Real pref = std::pow(r_eff*sth, 3.0/4.0);
   Real tanth = 1.0/SQR(std::tan(th));
   Real mpow = std::pow(M_PARAM, 5.0/4.0);
   Real frac = mpow/std::pow(1.0+tanth, 5.0/8.0);
@@ -1847,6 +1847,13 @@ void VectorPotential(Real x1, Real x2, Real x3, Real *p_a_1, Real *p_a_2, Real *
 
   //do we have to transform this to covariant kerr schild??
 #else
+  // Determine if we are in the magnetized torus
+    if (r_bl < r_edge) {
+      *p_a_1 = 0.0;
+      *p_a_2 = 0.0;
+      *p_a_3 = 0.0;
+      return;
+    }
   Real log_h = LogHAux(r_bl, sth_bl_t) - log_h_edge;  // (FM 3.6)
   if (log_h < 0.0) {
     *p_a_1 = 0.0;
