@@ -83,6 +83,7 @@ void rhof(Real r, Real th, Real pgas_over_rho, Real *rho);
 void rhofraw(Real r, Real theta, Real pgas_over_rho, Real *rho);
 void pgas_over_rhof(Real r, Real log_h, Real *pgas_over_rho);
 void rhoMaxf(Mesh *pmy_mesh, Real *rhomax);
+Real ChristoffelSymbol(int a, int b, int c, Real r, Real sth);
 } // namespace
 
 // File variables
@@ -1197,6 +1198,9 @@ Real HistorySum(MeshBlock *pmb, int iout) {
   return pmb->ruser_meshblock_data[4](iout/4,iout%4);
 }
 
+
+
+
 //----------------------------------------------------------------------------------------
 // Cooling function
 
@@ -1541,11 +1545,62 @@ Real LogHAux(Real r, Real sth) {
 //       matches the formula used in Harm (init.c).
 
 namespace {
+#define CH_LIST_INDEX(a,b,c) ( (a)*4*4+(b)*4+(c) )
+/**
+ * Returns Gamma^a_bc at cell indices i j k.
+ *
+ */
+Real ChristoffelSymbol(int a, int b, int c, Real r, Real sth){
+  int index = CH_LIST_INDEX(a,b,c);
+  Real cth = std::sqrt(1.0-SQR(sth));
+  Real sigma = SQR(r)+SQR(a*cth);
+  Real delta = SQR(r)-2*m*r+SQR(a);
+  Real f0,f1;
+  switch (index) {
+    case CH_LIST_INDEX(1,0,0)://^r_t_t
+      return 2*m*delta*(SQR(r)-SQR(a*cth))/(2*CUBE(sigma));
+    case CH_LIST_INDEX(1,3,3)://^r_ph_ph
+      f0 = SQR(r)-SQR(a*cth);
+      f1 = -2*r*SQR(sigma)+2*m*SQR(a*sth)*f0;
+      return delta*SQR(sth)/(2*CUBE(sigma))*f1;
+    case CH_LIST_INDEX(1,0,3)://^r_t_ph
+      f0 = SQR(r)-SQR(a*cth);
+      return -2*m*delta*a*SQR(sth)*f0/(2*CUBE(sigma));
+    default:
+      std::cout << "Unknown or unsupported christoffel symbol index detected, this is not good" << std::endl;
+      return NAN;
+  }
+}
+
 void CalculateVelocityInTorus(Real r, Real sth, Real *p_ut, Real *p_uph) {
 #ifdef THINDISK
-  Real x = std::sqrt(r);
-  *p_ut = (a + CUBE(x))/std::sqrt(CUBE(x)*(2*a+CUBE(x)-3*x));
-  *p_uph = 1/std::sqrt(CUBE(x)*(2*a+CUBE(x)-3*x));
+  //Real x = std::sqrt(r);
+  //*p_ut = (a + CUBE(x))/std::sqrt(CUBE(x)*(2*a+CUBE(x)-3*x));
+  //*p_uph = 1/std::sqrt(CUBE(x)*(2*a+CUBE(x)-3*x));
+  Real cth = std::sqrt(1.0-SQR(sth));
+  Real sigma = SQR(r)+SQR(a*cth);
+  Real delta = SQR(r)-2*m*r+SQR(a);
+  //coul have implemented the christoffelsymbols right here, but whatever
+  Real rtt = ChristoffelSymbol(1,0,0,r,sth);
+  Real rphph = ChristoffelSymbol(1,3,3,r,sth);
+  Real rtph = ChristoffelSymbol(1,0,3,r,sth);
+  Real gtt = -(1.0-r*2*m/sigma);
+  Real gphph = (SQR(r)+SQR(a)+2*m*SQR(a)*r*SQR(sth)/sigma)*SQR(sth);
+  Real gtph = -2*2*m*a*r*SQR(sth)/sigma;
+
+  Real A = SQR(rtt);
+  Real B = gtt*(rtt*rphph-2*SQR(rtph))+2*gtph*rtt*rtph-gphph*SQR(rtt);
+  Real C = (SQR(rtph)-rtt*rphph)*SQR(gtph*rtt-gtt*rtph);
+  Real uph = std::sqrt(A/(B+2*std::sqrt(C)));
+
+  Real p_2 = gtph/gtt*uph;
+  Real q = gphph/gtt*SQR(uph)+1.0/gtt;
+  Real ut = -p_2+std::sqrt(SQR(p_2)-q);
+  //std::cout << *p_ut << " - " << *p_uph << std::endl;
+  //std::cout << ut << " - " << uph << std::endl;
+  //std::cout << "---" << std::endl;
+  *p_ut = ut;
+  *p_uph = uph;
 #else
   Real sth2 = SQR(sth);
   Real cth2 = 1.0 - sth2;
