@@ -41,7 +41,7 @@
 #define K_ENTROPY 0.1
 #define H_ASPECT 0.05
 #define M_PARAM 0.1
-#define BETAINP 0.01;
+#define BETAINP 1000.0;
 // Declarations
 enum class MagneticFieldConfigs {density, loops};
 void InflowBoundary(MeshBlock *pmb, Coordinates *pcoord, AthenaArray<Real> &prim,

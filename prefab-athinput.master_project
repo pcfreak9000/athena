@@ -7,8 +7,8 @@ problem_id = master_project  # problem ID: base name of output files
 
 <time>
 cfl_number = 0.3  # factor multiplying shortest cell crossing time
-nlim       = 1   # maximum simulation steps
-tlim       = -1 #{TIME}  # maximum simulation time
+nlim       = -1   # maximum simulation steps
+tlim       = {TIME}  # maximum simulation time
 integrator = rk4  # time integration algorithm
 xorder     = 3    # order of spatial reconstruction
 ncycle_out = 400    # interval for stdout summary info
@@ -109,13 +109,13 @@ h = 1.0  # grid compression parameter
 gamma     = 1.3333333333333333  # ratio of specific heats Gamma
 dfloor    = 1.0e-6              # floor on density rho
 pfloor    = 1.0e-8              # floor on gas pressure p_gas
-rho_min   = 1.0e-4              # floor on rho given by rho_min ...
+rho_min   = 1.0e-5              # floor on rho given by rho_min ...
 rho_pow   = -1.5                # ... * r^rho_pow
-pgas_min  = 1.0e-6              # floor on p_gas given by pgas_min ...
+pgas_min  = 1.3e-9              # floor on p_gas given by pgas_min ...
 pgas_pow  = -2.5                # ... * r^pgas_pow
-sigma_max = 100.0               # maximum allowed value of 2*p_mag/rho
-beta_min  = 0.001               # minimum allowed value of p_gas/p_mag
-gamma_max = 50.0
+sigma_max = 50.0               # maximum allowed value of 2*p_mag/rho
+beta_min  = 0.5               # minimum allowed value of p_gas/p_mag
+gamma_max = 20.0
 
 <problem>
 
