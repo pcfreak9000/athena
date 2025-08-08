@@ -635,6 +635,7 @@ void MeshBlock::ProblemGenerator(ParameterInput *pin) {
   return;
 }
 #ifdef POSTPROBLEMGENERATOR
+//this is actually horrible here but it works... for now.
 void MeshBlock::FindMax(ParameterInput *pin) {
   //calc B_sq using formula from UserWorkInLoop
   //find max B_sq over all meshblocks
