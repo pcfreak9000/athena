@@ -7,11 +7,11 @@ import math
 input_file_path = "prefab-athinput.master_project"
 output_file_path = "athinput.pp_master_project"
 
-time = 3e3
+time = 3e4
 outputdt = 10
 spin = 0.5
 
-r_edge = 6.0
+r_edge = 10.0
 r_peak = 30.0
 
 th_nocool = 0.1
