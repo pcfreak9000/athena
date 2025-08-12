@@ -517,7 +517,8 @@ void MeshBlock::ProblemGenerator(ParameterInput *pin) {
 
           // Transform to preferred coordinates
           Real u0, u1, u2, u3;
-          TransformContravariantFromBoyerLindquist(u0_bl, 0.0, u2_bl, u3_bl, x1, x2, x3,
+          //use u1_bl=0.0 here? or was that a bug which is fixed now?
+          TransformContravariantFromBoyerLindquist(u0_bl, u1_bl, u2_bl, u3_bl, x1, x2, x3,
               &u0, &u1, &u2, &u3);
           uu1 = u1 - gi(I01,i) / gi(I00,i) * u0;
           uu2 = u2 - gi(I02,i) / gi(I00,i) * u0;
