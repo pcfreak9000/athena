@@ -10,7 +10,7 @@ import csv
 # kappa = 0.4 #in cgs
 eta = 0.06 #radiative 
 mdottarget = 0.1
-mdotcode = 0.000015*50
+mdotcode = 0.00066178*50
 # solar_mass_cgs = 1.988e33
 # bh_mass_cgs = 5.0*solar_mass_cgs
 # g_cgs = 6.674e-8 #grav. constant in cgs
