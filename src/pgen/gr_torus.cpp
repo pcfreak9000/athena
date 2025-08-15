@@ -725,6 +725,7 @@ void MeshBlock::PostProblemGenerator(ParameterInput* pin){
     kl -= NGHOST;
     ku += NGHOST;
   }
+  std::cout << "Current beta inp: " << 2*pgas_max/b_sq_max << std::endl;
   Real b_sq_new = 2 * pgas_max/BETAINP;
   Real renorm = std::sqrt(b_sq_new/b_sq_max);
   if(b_sq_max==0.0){
