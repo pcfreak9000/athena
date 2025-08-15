@@ -12,7 +12,7 @@ outputdt = 10
 spin = 0.5
 
 r_edge = 10.0
-r_peak = 30.0
+r_peak = 180.0
 
 th_nocool = 0.1
 mass = 1.0 #per recommendation, we leave this at 1
