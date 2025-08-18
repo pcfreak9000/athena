@@ -1615,6 +1615,83 @@ void Mesh::ApplyUserWorkBeforeOutput(ParameterInput *pin) {
     my_blocks(i)->UserWorkBeforeOutput(pin);
 }
 
+
+#ifdef POSTPROBLEMGENERATOR
+void Mesh::FindMax(ParameterInput *pin, Real& b_sq_max, Real& pgas_max) {
+  //calc B_sq using formula from UserWorkInLoop
+  //find max B_sq over all meshblocks
+  // Prepare scratch arrays
+
+  int mbs = my_blocks.GetSize();
+  Real max = 0.0;
+  Real maxgas = 0.0;
+  for(int a = 0; a<mbs; a++){
+    MeshBlock* mb = my_blocks(a);
+    Coordinates* coords = mb->pcoord;
+    Hydro* phydro = mb->phydro;
+    Field* pfield = mb->pfield;
+    AthenaArray<Real> &g = mb->ruser_meshblock_data[0];
+    AthenaArray<Real> &gi = mb->ruser_meshblock_data[1];
+    int is = mb->is;
+    int ie = mb->ie;
+    int js = mb->js;
+    int je = mb->je;
+    for(int k=0; k<coords->x3v.GetSize(); k++){
+      for(int j=0; j<coords->x2v.GetSize(); j++){
+        coords->CellMetric(k, j, 0, coords->x1v.GetSize()-1, g, gi);
+        for(int i=0; i<coords->x1v.GetSize(); i++){
+
+          Real pg = phydro->w(IPR,k,j,i);
+          if(pg > maxgas) maxgas = pg;
+          // Calculate normal-frame Lorentz factor
+          Real uu1 = phydro->w(IVX,k,j,i);
+          Real uu2 = phydro->w(IVY,k,j,i);
+          Real uu3 = phydro->w(IVZ,k,j,i);
+          Real tmp = g(I11,i) * SQR(uu1) + 2.0 * g(I12,i) * uu1 * uu2
+              + 2.0 * g(I13,i) * uu1 * uu3 + g(I22,i) * SQR(uu2)
+              + 2.0 * g(I23,i) * uu2 * uu3 + g(I33,i) * SQR(uu3);
+          Real gamma = std::sqrt(1.0 + tmp);
+
+          // Calculate 4-velocity
+          Real alpha = std::sqrt(-1.0 / gi(I00,i));
+          Real u0 = gamma / alpha;
+          Real u1 = uu1 - alpha * gamma * gi(I01,i);
+          Real u2 = uu2 - alpha * gamma * gi(I02,i);
+          Real u3 = uu3 - alpha * gamma * gi(I03,i);
+          Real u_0, u_1, u_2, u_3;
+          coords->LowerVectorCell(u0, u1, u2, u3, k, j, i, &u_0, &u_1, &u_2, &u_3);
+
+          // Calculate 4-magnetic field
+          Real bb1 = 0.0, bb2 = 0.0, bb3 = 0.0;
+          Real b0 = 0.0, b1 = 0.0, b2 = 0.0, b3 = 0.0;
+          Real b_0 = 0.0, b_1 = 0.0, b_2 = 0.0, b_3 = 0.0;
+          if (MAGNETIC_FIELDS_ENABLED) {
+            //TOD- consider using b.x123f instead of bcc?
+  //          bb1 = pfield->bcc(IB1,k,j,i);
+  //          bb2 = pfield->bcc(IB2,k,j,i);
+  //          bb3 = pfield->bcc(IB3,k,j,i);
+            bb1 = pfield->b.x1f(k,j,i);
+            bb2 = pfield->b.x2f(k,j,i);
+            bb3 = pfield->b.x3f(k,j,i);
+            b0 = u_1 * bb1 + u_2 * bb2 + u_3 * bb3;
+            b1 = (bb1 + b0 * u1) / u0;
+            b2 = (bb2 + b0 * u2) / u0;
+            b3 = (bb3 + b0 * u3) / u0;
+            coords->LowerVectorCell(b0, b1, b2, b3, k, j, i, &b_0, &b_1, &b_2, &b_3);
+          }
+
+          // Calculate magnetic pressure
+          Real b_sq = b0 * b_0 + b1 * b_1 + b2 * b_2 + b3 * b_3;
+          if (b_sq > max) max = b_sq;
+        }
+      }
+    }
+  }
+  b_sq_max = max;
+  pgas_max = maxgas;
+}
+#endif
+
 //----------------------------------------------------------------------------------------
 //! \fn void Mesh::Initialize(int res_flag, ParameterInput *pin)
 //! \brief  initialization before the main loop
@@ -1634,15 +1711,14 @@ void Mesh::Initialize(int res_flag, ParameterInput *pin) {
       }
 
 #ifdef POSTPROBLEMGENERATOR
+      Real b_sq_max = 0.0;
+      Real pgas_max = 0.0;
+      FindMax(pin, b_sq_max, pgas_max);
+      std::cout << "Unnormalized/initial beta inp: " << 2*pgas_max/b_sq_max << std::endl;
 #pragma omp parallel for num_threads(nthreads)
       for (int i=0; i<nblocal; ++i) {
         MeshBlock *pmb = my_blocks(i);
-        pmb->FindMax(pin);
-      }
-#pragma omp parallel for num_threads(nthreads)
-      for (int i=0; i<nblocal; ++i) {
-        MeshBlock *pmb = my_blocks(i);
-        pmb->PostProblemGenerator(pin);
+        pmb->PostProblemGenerator(pin, b_sq_max, pgas_max);
         pmb->pbval->CheckUserBoundaries();//not sure if this is useful again, but we do modify stuff in postproblemgenerator...
       }
 #endif

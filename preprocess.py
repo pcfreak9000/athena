@@ -14,7 +14,9 @@ spin = 0.5
 r_edge = 10.0
 r_peak = 60.0
 
-th_nocool = 10.0 #emulates th_nocool=0.1 with the weird cooling function which does not map the paper. but with this, the accretion disks make more sense
+betainp = 500.0
+
+#we leave it be in the initial conditions file. th_nocool = 10.0 #emulates th_nocool=0.1 with the weird cooling function which does not map the paper. but with this, the accretion disks make more sense
 mass = 1.0 #per recommendation, we leave this at 1
 horizon = mass * (1.0 + math.sqrt(1.0 - (spin/mass)**2))
 #r_edge = horizon
@@ -29,7 +31,7 @@ replacements = {
     "{SPIN}": spin,
     "{TIME}": actualtime,
     "{O_DT}": actualdt,
-    "{TH_NOCOOL}": th_nocool,
+    "{BETA_INP}": betainp,
     "{R_EDGE}": r_edge,
     "{R_PEAK}": r_peak
 }
