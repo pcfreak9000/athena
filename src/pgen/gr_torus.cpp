@@ -40,7 +40,7 @@
 #define K_ENTROPY 0.1
 #define H_ASPECT 0.05
 #define M_PARAM 0.1
-#define BETAINP 5.0;
+#define BETAINP 500.0;
 // Declarations
 enum class MagneticFieldConfigs {density, loops};
 void InflowBoundary(MeshBlock *pmb, Coordinates *pcoord, AthenaArray<Real> &prim,
@@ -1269,9 +1269,9 @@ void Cooling(MeshBlock *pmb, const Real time, const Real dt,
 
         Real tau_cool = 2 * M_PI / omega_k ;
         Real K_c = pgas_min / pow(rho_min, gamma_adi);
-        Real shape_theta = exp(-1*pow((th - (M_PI/2)),2) / 2*theta_nocool*theta_nocool);
+        //Real shape_theta = exp(-1*pow((th - (M_PI/2)),2) / 2*theta_nocool*theta_nocool);
         //Real shape_theta = exp(-1*pow((th - (M_PI/2)),2) / (2*theta_nocool*theta_nocool));
-        //Real shape_theta = exp(-1*SQR(th - (M_PI/2.0)) / (2.0 * SQR(theta_nocool)));
+        Real shape_theta = exp(-1*SQR(th - M_PI_2) / (2.0 * SQR(theta_nocool)));
         Real lnKkc = log(K / K_c);
         Real U_tau = 0;
         if(dt < tau_cool && lnKkc > 0) {
