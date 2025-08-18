@@ -10,7 +10,7 @@ else
     ATHENA_CONFIG_FILE=$5
 fi
 
-MYNAME="$1"_$(date +"%Y-%m-%d_%H-%M-%S")
+MYNAME="$1" #_$(date +"%Y-%m-%d_%H-%M-%S")
 
 #echo $MYNAME
 #echo $queue
@@ -24,6 +24,10 @@ if [ "$BINAC2" ]; then
     WORKDIR="$WORK"/"$MYNAME"
 else
     WORKDIR="$(pwd)"/Gartenzwerg/"$MYNAME"
+fi
+if [ -d "$WORKDIR" ]; then
+    echo "can't execute, workdir already present"
+    exit 1
 fi
 export ATHENABIN="$WORKDIR"/athena
 export WORKDIR
