@@ -77,13 +77,13 @@ def main(**kwargs):
     du1 = data['u1']
     du2 = data['u2']
     du3 = data['u3']
-    xs = []
-    ys = []
-    densities = []
-    u0 = []
-    u1 = []
-    u2 = []
-    u3 = []
+    xs = [0.0]
+    ys = [0.0]
+    densities = [0.0]
+    u0 = [0.0]
+    u1 = [0.0]
+    u2 = [0.0]
+    u3 = [0.0]
     for rInd in range(0, rcoords.shape[0]):
         #print(len(rcoords))
         thtop, interpol = getThetaTop(rInd, rho, rcoords, thcoords, thbord, a, tau_factor)
@@ -101,13 +101,23 @@ def main(**kwargs):
         else:
             xs.append(math.sqrt(rcoords[rInd]**2 + a*a) * math.sin(getFromBorderIndex(thcoords, thtop, interpol)))
             #xs.append(rcoords[rInd])
-            ys.append(rcoords[rInd] * math.cos(getFromBorderIndex(thcoords, thtop, interpol)))
+            ytoappend = rcoords[rInd] * math.cos(getFromBorderIndex(thcoords, thtop, interpol))
+            if ytoappend < 0.0:
+                ytoappend = 0.0
+            ys.append(ytoappend)
             densities.append(getFromBorderIndex(rho[0, :, rInd], thtop, interpol))
             u0.append(getFromBorderIndex(du0[0, :, rInd], thtop, interpol))
             u1.append(getFromBorderIndex(du1[0, :, rInd], thtop, interpol))
             u2.append(getFromBorderIndex(du2[0, :, rInd], thtop, interpol))
             u3.append(getFromBorderIndex(du3[0, :, rInd], thtop, interpol))
-
+    #make sure the disk is closed towards the outer edge
+    xs.append(xs[-1]+0.5)
+    ys.append(0.0)
+    densities.append(densities[-1])
+    u0.append(u0[-1])
+    u1.append(u1[-1])
+    u2.append(u2[-1])
+    u3.append(u3[-1])
     #lis = [rcoords, heights, densities, u0, u1, u2, u3]
     lis = [xs, ys, densities, u0, u1, u2, u3]
     zl = zip(*lis)
@@ -117,7 +127,7 @@ def main(**kwargs):
         writer.writerow(['#x', 'y', 'density', 'u0', 'u1', 'u2', 'u3'])
         for t in zl:
             writer.writerow(t)
-        
+
 # Execute main function
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
