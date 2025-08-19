@@ -3,7 +3,7 @@ import csv
 import argparse
 import sys
 
-def average_column_in_range(file_path, column, start_line, end_line, has_header=True):
+def average_column_in_range(file_path, column, start_line, end_line, has_header=True, b=False):
     """
     Calculate the average of a specified column for a given range of line numbers.
     Works with space-separated scientific notation values.
@@ -18,7 +18,8 @@ def average_column_in_range(file_path, column, start_line, end_line, has_header=
                     try:
                         values.append(float(row[column]))
                     except ValueError:
-                        print(f"Skipping non-numeric value at line {line_num}: {row[column]}")
+                        if not b:
+                            print(f"Skipping non-numeric value at line {line_num}: {row[column]}")
         else:
             reader = csv.reader(csvfile, delimiter=" ", skipinitialspace=True)
             for line_num, row in enumerate(reader, start=1):
@@ -26,14 +27,20 @@ def average_column_in_range(file_path, column, start_line, end_line, has_header=
                     try:
                         values.append(float(row[column]))
                     except (ValueError, IndexError):
-                        print(f"Skipping invalid or missing value at line {line_num}")
+                        if not b:
+                            print(f"Skipping invalid or missing value at line {line_num}")
 
     if values:
         avg = sum(values) / len(values)
-        print(f"Average of column '{column}' from lines {start_line} to {end_line}: {avg}")
+        if b:
+            print(avg)
+        else:
+            print(f"Average of column '{column}' from lines {start_line} to {end_line}: {avg}")
         return avg
     else:
         print("No valid numeric data found in the specified range.")
+        if b:
+            sys.exit(1)
         return None
 
 
@@ -44,7 +51,7 @@ if __name__ == "__main__":
     parser.add_argument("start", help="Start line number (1-based)", type=int)
     parser.add_argument("end", help="End line number (inclusive)", type=int)
     parser.add_argument("--no-header", action="store_true", help="Specify if the file does not have a header")
-
+    parser.add_argument("-b", action="store_true", help="for use in a script")
     args = parser.parse_args()
 
     # Convert column to int if no header
@@ -60,5 +67,6 @@ if __name__ == "__main__":
         column=args.column,
         start_line=args.start,
         end_line=args.end,
-        has_header=not args.no_header
+        has_header=not args.no_header,
+        b=args.b
     )

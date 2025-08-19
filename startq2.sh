@@ -29,6 +29,7 @@ if [ -d "$WORKDIR" ]; then
     echo "can't execute, workdir already present"
     exit 1
 fi
+./preprocess.py
 export ATHENABIN="$WORKDIR"/athena
 export WORKDIR
 export ATHENA_CONFIG_FILE

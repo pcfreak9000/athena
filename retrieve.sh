@@ -40,6 +40,6 @@ copy "ii.mp4" "ii.mp4"
 copy "ii_log.mp4" "ii_log.mp4"
 copy "LOG_ATHENA" "LOG_ATHENA"
 copy "athinput.pp_master_project" "athinput"
-copy "mdot.csv" "mdot_depr.csv"
+copy "mdot.csv" "mdot_deprecated.csv"
 
 

@@ -9,22 +9,31 @@ import csv
 
 #kappa = 0.4 #in cgs
 eta = 0.06 #radiative
-mdottarget = 0.1
-mdotcode = 0.039189*50
-solar_mass_cgs = 1.988e33
-bh_mass_cgs = 10*solar_mass_cgs
-g_cgs = 6.674e-8 #grav. constant in cgs
-c_cgs = 2.998e10 #speed of light in cgs
-rho_code_cgs = 4*math.pi*c_cgs*c_cgs*mdottarget/(eta*mdotcode*g_cgs*bh_mass_cgs)
-rho_code_cgs_simple = 4*math.pi*mdottarget/(eta*mdotcode)
+#mdottarget = 0.1
+#mdotcode = 0.039189*50
+#solar_mass_cgs = 1.988e33
+#bh_mass_cgs = 10*solar_mass_cgs
+#g_cgs = 6.674e-8 #grav. constant in cgs
+#c_cgs = 2.998e10 #speed of light in cgs
+#rho_code_cgs = 4*math.pi*c_cgs*c_cgs*mdottarget/(eta*mdotcode*g_cgs*bh_mass_cgs)
+#rho_code_cgs_simple = 4*math.pi*mdottarget/(eta*mdotcode)
 
-print(rho_code_cgs)
-print(rho_code_cgs_simple)
+#print(rho_code_cgs)
+#print(rho_code_cgs_simple)
 
-tau_factor = rho_code_cgs_simple
+#tau_factor = rho_code_cgs_simple
 tau_target = 1.0
 
-def getThetaTop(radiusInd, rho, rcoords, thcoords, thbord, a):
+def getTauFactor(kwargs):
+    mdottarget=float(kwargs['mdt'])
+    x3min=float(kwargs['x3min'])
+    x3max=float(kwargs['x3max'])
+    modifier=2.0*math.pi/(x3max-x3min)
+    mdotcode=kwargs['mdc']
+    return 4.0*math.pi*mdottarget/(eta*mdotcode*modifier)
+
+
+def getThetaTop(radiusInd, rho, rcoords, thcoords, thbord, a, tau_factor):
     tau = 0.0
     thetaInd = 0
     prevTau = 0.0
@@ -57,6 +66,7 @@ def getFromBorderIndex(array, indexTauGrOne, interpol):
 def main(**kwargs):
     input_filename = kwargs['input_filename']
     output_filename = kwargs['output_filename']
+    tau_factor = getTauFactor(kwargs)
     a = kwargs['a']
     data = athena_read.athdf(input_filename)
     rho = data['rho']
@@ -76,7 +86,7 @@ def main(**kwargs):
     u3 = []
     for rInd in range(0, rcoords.shape[0]):
         #print(len(rcoords))
-        thtop, interpol = getThetaTop(rInd, rho, rcoords, thcoords, thbord, a)
+        thtop, interpol = getThetaTop(rInd, rho, rcoords, thcoords, thbord, a, tau_factor)
         # interpol = 0.5
         # heights in geometric units
         if thtop == -1:
@@ -120,5 +130,9 @@ if __name__ == '__main__':
     parser.add_argument('a',
                         type=float,
                         help='BH spin parameter')
+    parser.add_argument('x3min', type=float, help='x3min')
+    parser.add_argument('x3max', type=float, help='x3max')
+    parser.add_argument('mdt', type=float, help='mdot target')
+    parser.add_argument('mdc', type=float, help='mdot code')
     args = parser.parse_args()
     main(**vars(args))
