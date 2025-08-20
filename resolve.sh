@@ -25,4 +25,7 @@ echo "Avg mdot_code: $avgmdot"
 echo "Constructing shape..."
 vis/python/extract_shape.py "$local_target_dir"/tavg.athdf "$local_target_dir"/dshape.csv "$spin" "$x3min" "$x3max" "$targetmdot" "$avgmdot"
 #plot tavg.athdf rho --logc and maybe additional pngs?
+echo "Generating additional plots..."
+vis/python/plot_spherical.py "$local_target_dir"/tavg.athdf rho "$local_target_dir"/rho_tavg.png
+vis/python/plot_spherical.py "$local_target_dir"/tavg.athdf rho --logc "$local_target_dir"/rho_tavg_log.png
 echo "Done"
