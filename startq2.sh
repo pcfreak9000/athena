@@ -3,7 +3,7 @@
 wt="$2"
 nodes="$3"
 ppn="$4"
-
+./preprocess.py
 if [ -z "${5+x}" ]; then
     ATHENA_CONFIG_FILE=athinput.master_project
 else
@@ -29,7 +29,7 @@ if [ -d "$WORKDIR" ]; then
     echo "can't execute, workdir already present"
     exit 1
 fi
-./preprocess.py
+
 export ATHENABIN="$WORKDIR"/athena
 export WORKDIR
 export ATHENA_CONFIG_FILE

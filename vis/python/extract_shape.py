@@ -56,6 +56,8 @@ def getThetaTop(radiusInd, rho, rcoords, thcoords, thbord, a, tau_factor):
         thetaInd += 1
 
     interpol = (tau_target - prevTau) / (tau - prevTau)
+    if thcoords[thetaInd] > math.pi/2.0:
+        return -1, 0.0
     return thetaInd, interpol
 
 def getFromBorderIndex(array, indexTauGrOne, interpol):
@@ -103,6 +105,7 @@ def main(**kwargs):
             #xs.append(rcoords[rInd])
             ytoappend = rcoords[rInd] * math.cos(getFromBorderIndex(thcoords, thtop, interpol))
             if ytoappend < 0.0:
+                print("negative y should not occur at this place")
                 ytoappend = 0.0
             ys.append(ytoappend)
             densities.append(getFromBorderIndex(rho[0, :, rInd], thtop, interpol))
