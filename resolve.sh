@@ -4,7 +4,8 @@ binac_target_name="$1"
 local_target_dir="$2"
 minrange="$3"
 maxrange="$4"
-targetmdot=0.15
+targetmdot0=0.15
+targetmdot1=0.05
 hstfileindex=13
 if [ ! -d "$2" ]; then
     echo "Retrieving..."
@@ -23,7 +24,8 @@ echo "X3max: $x3max"
 echo "Avg mdot_code: $avgmdot"
 #calculate surface shape
 echo "Constructing shape..."
-vis/python/extract_shape.py "$local_target_dir"/tavg.athdf "$local_target_dir"/dshape.csv "$spin" "$x3min" "$x3max" "$targetmdot" "$avgmdot"
+vis/python/extract_shape.py "$local_target_dir"/tavg.athdf "$local_target_dir"/dshape"$targetmdot0".csv "$spin" "$x3min" "$x3max" "$targetmdot0" "$avgmdot"
+vis/python/extract_shape.py "$local_target_dir"/tavg.athdf "$local_target_dir"/dshape"$targetmdot1".csv "$spin" "$x3min" "$x3max" "$targetmdot1" "$avgmdot"
 #plot tavg.athdf rho --logc and maybe additional pngs?
 echo "Generating additional plots..."
 vis/python/plot_spherical.py "$local_target_dir"/tavg.athdf rho "$local_target_dir"/rho_tavg.png
