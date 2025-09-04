@@ -4,13 +4,17 @@ binac_target_name="$1"
 local_target_dir="$2"
 minrange="$3"
 maxrange="$4"
-targetmdot0=0.15
-targetmdot1=0.05
 hstfileindex=13
 if [ ! -d "$2" ]; then
     echo "Retrieving..."
     ./retrieve.sh "$1" "$2"
 fi
+
+exshape () {
+    vis/python/extract_shape.py "$local_target_dir"/tavg.athdf "$local_target_dir"/dshape"$1".csv "$spin" "$x3min" "$x3max" "$1" "$avgmdot"
+}
+
+
 echo "Preparing additional information..."
 #calculate avg mdot using script in the appropriate range
 avgmdot=$(vis/python/avg_csv.py --no-header -b "$local_target_dir"/hist.hst "$hstfileindex" $(("$minrange"+3)) $(("$maxrange"+3)))
@@ -23,9 +27,12 @@ echo "X3min: $x3min"
 echo "X3max: $x3max"
 echo "Avg mdot_code: $avgmdot"
 #calculate surface shape
-echo "Constructing shape..."
-vis/python/extract_shape.py "$local_target_dir"/tavg.athdf "$local_target_dir"/dshape"$targetmdot0".csv "$spin" "$x3min" "$x3max" "$targetmdot0" "$avgmdot"
-vis/python/extract_shape.py "$local_target_dir"/tavg.athdf "$local_target_dir"/dshape"$targetmdot1".csv "$spin" "$x3min" "$x3max" "$targetmdot1" "$avgmdot"
+echo "Constructing shape(s)..."
+exshape 0.3
+exshape 0.2
+exshape 0.1
+exshape 0.02
+exshape 0.01
 #plot tavg.athdf rho --logc and maybe additional pngs?
 echo "Generating additional plots..."
 vis/python/plot_spherical.py "$local_target_dir"/tavg.athdf rho "$local_target_dir"/rho_tavg.png
