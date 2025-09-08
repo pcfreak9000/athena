@@ -22,7 +22,9 @@ avgmdot=$(vis/python/avg_csv.py --no-header -b "$local_target_dir"/hist.hst "$hs
 spin=$(grep -E '^\s*a\s*=' "$local_target_dir"/athinput | awk -F'=' '{print $2}' | awk '{print $1}')
 x3min=$(grep -m1 -E '^\s*x3min\s*=' "$local_target_dir"/athinput | awk -F'=' '{print $2}' | awk '{print $1}')
 x3max=$(grep -m1 -E '^\s*x3max\s*=' "$local_target_dir"/athinput | awk -F'=' '{print $2}' | awk '{print $1}')
+x1max=$(grep -m1 -E '^\s*x1max\s*=' "$local_target_dir"/athinput | awk -F'=' '{print $2}' | awk '{print $1}')
 echo "Spin: $spin"
+echo "X1max: $x1max"
 echo "X3min: $x3min"
 echo "X3max: $x3max"
 echo "Avg mdot_code: $avgmdot"
@@ -37,7 +39,6 @@ exshape 0.01
 echo "Generating additional plots..."
 vis/python/plot_spherical.py "$local_target_dir"/tavg.athdf rho "$local_target_dir"/rho_tavg.png
 vis/python/plot_spherical.py "$local_target_dir"/tavg.athdf rho --logc "$local_target_dir"/rho_tavg_log.png
-pwdstored=$(pwd)
 cd "$local_target_dir"
-gnuplot "$pwdstored"/plotdshape.p
-echo "Done"
+gnuplot -e "set terminal png size 1000,1000; set output 'plot_dshapes.png'; set xrange[0:$x1max]; set yrange[0:$x1max]; plot \"dshape0.3.csv\", \"dshape0.2.csv\", \"dshape0.1.csv\", \"dshape0.02.csv\", \"dshape0.01.csv\";" 
+echo "Done."
