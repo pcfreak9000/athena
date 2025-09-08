@@ -37,4 +37,7 @@ exshape 0.01
 echo "Generating additional plots..."
 vis/python/plot_spherical.py "$local_target_dir"/tavg.athdf rho "$local_target_dir"/rho_tavg.png
 vis/python/plot_spherical.py "$local_target_dir"/tavg.athdf rho --logc "$local_target_dir"/rho_tavg_log.png
+pwdstored=$(pwd)
+cd "$local_target_dir"
+gnuplot "$pwdstored"/plotdshape.p
 echo "Done"
