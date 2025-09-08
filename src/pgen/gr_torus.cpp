@@ -36,9 +36,12 @@
 #endif
 
 #define THINDISK
+
 #define THETA0 0.001
 #define K_ENTROPY 0.1
+
 #define H_ASPECT 0.05
+
 #define M_PARAM 0.1
 
 // Declarations
@@ -1206,9 +1209,9 @@ void Cooling(MeshBlock *pmb, const Real time, const Real dt,
         else{
           U_tau = 0;
         }
-        //What are these conditions? Especially the second, with the hardcoded 10???
+        //What are these conditions? Especially the second, with the hardcoded 10??? that was not in Penna2010
         if(r <= (1 + sqrt(1 - a*a))) U_tau = 0;
-        if(b_sq/rho >= 10) U_tau = 0;
+        //if(b_sq/rho >= 10) U_tau = 0;
 
         // Apply cooling
         cons(IEN,k,j,i) += U_tau * u_0;
