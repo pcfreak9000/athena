@@ -97,7 +97,7 @@ pgas_min  = 1.3e-9              # floor on p_gas given by pgas_min ...
 pgas_pow  = -2.5                # ... * r^pgas_pow
 sigma_max = 100               # maximum allowed value of 2*p_mag/rho
 beta_min  = 0.01               # minimum allowed value of p_gas/p_mag
-gamma_max = 50.0
+gamma_max = 20.0
 
 <problem>
 beta_inp = {BETA_INP}
