@@ -31,7 +31,7 @@ dt = {O_DT}
 
 <mesh>
 num_threads = 1
-refinement = static
+refinement = none
 
 # radial coordinate in global root grid
 nx1    = 128                  # number of cells
