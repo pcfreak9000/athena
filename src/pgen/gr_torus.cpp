@@ -38,7 +38,10 @@
 #define THINDISK
 
 #define THETA0 0.001
-#define K_ENTROPY 0.1
+//this constant doesn't really have an influence, rho is renormalized anyways
+#define K_ENTROPY 0.01
+
+#define TARGET_Kc 0.00069
 
 #define H_ASPECT 0.05
 
@@ -1197,7 +1200,11 @@ void Cooling(MeshBlock *pmb, const Real time, const Real dt,
         Real omega_k = 1./(a + pow(R,1.5));
 
         Real tau_cool = 2 * M_PI / omega_k ;
+#ifdef TARGET_Kc
+        Real K_c = TARGET_Kc;
+#else
         Real K_c = pgas_min / pow(rho_min, gamma_adi);
+#endif
         //Real shape_theta = exp(-1*pow((th - (M_PI/2)),2) / 2*theta_nocool*theta_nocool);
         //Real shape_theta = exp(-1*pow((th - (M_PI/2)),2) / (2*theta_nocool*theta_nocool));
         Real shape_theta = exp(-1*SQR(th - M_PI_2) / (2.0 * SQR(theta_nocool)));
