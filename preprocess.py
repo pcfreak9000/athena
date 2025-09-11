@@ -11,7 +11,7 @@ time = 3e4
 outputdt = 10
 spin = 0.5
 
-r_edge = 10.0
+r_edge = 12.0
 r_peak = 60.0
 
 betainp = 500.0
