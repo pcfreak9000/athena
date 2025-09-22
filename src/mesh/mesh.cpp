@@ -1743,14 +1743,14 @@ void Mesh::Initialize(int res_flag, ParameterInput *pin) {
       FindMax(pin, b_sq_max, pgas_max, betamax, betamin);
 #ifdef MPI_PARALLEL
   // pack array, MPI allreduce over array, then unpack into Mesh variables
-  Real findmax_array[3] = {b_sq_max, pgas_max, betamax};
-  Real findmax_array_min[1] = {betamin}; //<- this is probably hot garbage
-  MPI_Allreduce(MPI_IN_PLACE, findmax_array, 3, MPI_ATHENA_REAL, MPI_MAX, MPI_COMM_WORLD);
-  MPI_Allreduce(MPI_IN_PLACE, findmax_array_min, 1, MPI_ATHENA_REAL, MPI_MIN, MPI_COMM_WORLD);
-  b_sq_max            = findmax_array[0];
-  pgas_max = findmax_array[1];
-  betamax  = findmax_array[2];
-  betamin       = findmax_array_min[0];
+  Real findmax_array2[3] = {b_sq_max, pgas_max, betamax};
+  Real findmax_array_min2[1] = {betamin}; //<- this is probably hot garbage
+  MPI_Allreduce(MPI_IN_PLACE, findmax_array2, 3, MPI_ATHENA_REAL, MPI_MAX, MPI_COMM_WORLD);
+  MPI_Allreduce(MPI_IN_PLACE, findmax_array_min2, 1, MPI_ATHENA_REAL, MPI_MIN, MPI_COMM_WORLD);
+  b_sq_max            = findmax_array2[0];
+  pgas_max = findmax_array2[1];
+  betamax  = findmax_array2[2];
+  betamin       = findmax_array_min2[0];
 #endif
       std::cout << "beta_inp_renorm=" << 2*pgas_max/b_sq_max << std::endl;
       std::cout << "beta_max_renorm=" << betamax << std::endl;
