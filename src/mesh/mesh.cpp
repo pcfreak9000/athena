@@ -1617,14 +1617,16 @@ void Mesh::ApplyUserWorkBeforeOutput(ParameterInput *pin) {
 
 
 #ifdef POSTPROBLEMGENERATOR
-void Mesh::FindMax(ParameterInput *pin, Real& b_sq_max, Real& pgas_max) {
+void Mesh::FindMax(ParameterInput *pin, Real& b_sq_max, Real& pgas_max, Real& betamax, Real& betamin) {
   //calc B_sq using formula from UserWorkInLoop
   //find max B_sq over all meshblocks
   // Prepare scratch arrays
 
   int mbs = my_blocks.GetSize();
-  Real max = 0.0;
-  Real maxgas = 0.0;
+  betamax = INIT_MAX;
+  betamin = INIT_MIN;
+  b_sq_max = INIT_MAX;
+  pgas_max = INIT_MAX;
   for(int a = 0; a<mbs; a++){
     MeshBlock* mb = my_blocks(a);
     Coordinates* coords = mb->pcoord;
@@ -1642,7 +1644,7 @@ void Mesh::FindMax(ParameterInput *pin, Real& b_sq_max, Real& pgas_max) {
         for(int i=0; i<coords->x1v.GetSize(); i++){
 
           Real pg = phydro->w(IPR,k,j,i);
-          if(pg > maxgas) maxgas = pg;
+          if(pg > pgas_max) pgas_max = pg;
           // Calculate normal-frame Lorentz factor
           Real uu1 = phydro->w(IVX,k,j,i);
           Real uu2 = phydro->w(IVY,k,j,i);
@@ -1682,13 +1684,14 @@ void Mesh::FindMax(ParameterInput *pin, Real& b_sq_max, Real& pgas_max) {
 
           // Calculate magnetic pressure
           Real b_sq = b0 * b_0 + b1 * b_1 + b2 * b_2 + b3 * b_3;
-          if (b_sq > max) max = b_sq;
+          Real beta = 2 * pg/b_sq;
+          if (b_sq > b_sq_max) b_sq_max = b_sq;
+          if(beta > betamax && b_sq != 0.0) betamax = beta;
+          if(beta < betamin && b_sq != 0.0) betamin = beta;
         }
       }
     }
   }
-  b_sq_max = max;
-  pgas_max = maxgas;
 }
 #endif
 
@@ -1700,7 +1703,8 @@ void Mesh::Initialize(int res_flag, ParameterInput *pin) {
   bool iflag = true;
   int inb = nbtotal;
   int nthreads = GetNumMeshThreads();
-
+  std::cout << nbtotal << std::endl;
+  std::cout << nblocal << std::endl;
   do {
     if (res_flag == 0) {
 #pragma omp parallel for num_threads(nthreads)
@@ -1711,16 +1715,24 @@ void Mesh::Initialize(int res_flag, ParameterInput *pin) {
       }
 
 #ifdef POSTPROBLEMGENERATOR
-      Real b_sq_max = 0.0;
-      Real pgas_max = 0.0;
-      FindMax(pin, b_sq_max, pgas_max);
-      std::cout << "Unnormalized/initial beta inp: " << 2*pgas_max/b_sq_max << std::endl;
+      Real b_sq_max = 0;
+      Real pgas_max = 0;
+      Real betamin = 0;
+      Real betamax = 0;
+      FindMax(pin, b_sq_max, pgas_max, betamax, betamin);
+      std::cout << "beta_inp_initial=" << 2*pgas_max/b_sq_max << std::endl;
+      std::cout << "beta_max_initial=" << betamax << std::endl;
+      std::cout << "beta_min_initial=" << betamin << std::endl;
 #pragma omp parallel for num_threads(nthreads)
       for (int i=0; i<nblocal; ++i) {
         MeshBlock *pmb = my_blocks(i);
         pmb->PostProblemGenerator(pin, b_sq_max, pgas_max);
         pmb->pbval->CheckUserBoundaries();//not sure if this is useful again, but we do modify stuff in postproblemgenerator...
       }
+      FindMax(pin, b_sq_max, pgas_max, betamax, betamin);
+      std::cout << "beta_inp_renorm=" << 2*pgas_max/b_sq_max << std::endl;
+      std::cout << "beta_max_renorm=" << betamax << std::endl;
+      std::cout << "beta_min_renorm=" << betamin << std::endl;
 #endif
     }
 

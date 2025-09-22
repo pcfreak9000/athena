@@ -13,6 +13,8 @@
 
 //flag required for magnetic field renormalization
 #define POSTPROBLEMGENERATOR
+#define INIT_MAX -1e70
+#define INIT_MIN -INIT_MAX
 
 // C headers
 
@@ -378,7 +380,7 @@ class Mesh {
   MGMaskFunc MGCRDiffusionSourceMaskFunction_;
   MGMaskFunc MGCRDiffusionCoeffMaskFunction_;
 #ifdef POSTPROBLEMGENERATOR
-  void FindMax(ParameterInput *pin, Real& b_sq_max, Real& pgas_max);
+  void FindMax(ParameterInput *pin, Real& b_sq_max, Real& pgas_max, Real& betamax, Real& betamin);
 #endif
   void AllocateRealUserMeshDataField(int n);
   void AllocateIntUserMeshDataField(int n);

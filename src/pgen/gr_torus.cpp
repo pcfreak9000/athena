@@ -41,11 +41,13 @@
 //this constant doesn't really have an influence, rho is renormalized anyways
 #define K_ENTROPY 0.1
 
-#define TARGET_Kc 0.00069
-
 #define H_ASPECT 0.05
 
 #define M_PARAM 0.1
+
+
+#define TARGET_Kc 0.00069
+
 
 // Declarations
 enum class MagneticFieldConfigs {density, loops};
