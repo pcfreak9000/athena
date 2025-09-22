@@ -1622,7 +1622,7 @@ void Mesh::FindMax(ParameterInput *pin, Real& b_sq_max, Real& pgas_max, Real& be
   //find max B_sq over all meshblocks
   // Prepare scratch arrays
 
-  int mbs = my_blocks.GetSize();
+  int mbs = nblocal;//my_blocks.GetSize();
   betamax = INIT_MAX;
   betamin = INIT_MIN;
   b_sq_max = INIT_MAX;
@@ -1720,6 +1720,17 @@ void Mesh::Initialize(int res_flag, ParameterInput *pin) {
       Real betamin = 0;
       Real betamax = 0;
       FindMax(pin, b_sq_max, pgas_max, betamax, betamin);
+#ifdef MPI_PARALLEL
+  // pack array, MPI allreduce over array, then unpack into Mesh variables
+  Real findmax_array[3] = {b_sq_max, pgas_max, betamax};
+  Real findmax_array_min[1] = {betamin}; //<- this is probably hot garbage
+  MPI_Allreduce(MPI_IN_PLACE, findmax_array, 3, MPI_ATHENA_REAL, MPI_MAX, MPI_COMM_WORLD);
+  MPI_Allreduce(MPI_IN_PLACE, findmax_array_min, 1, MPI_ATHENA_REAL, MPI_MIN, MPI_COMM_WORLD);
+  b_sq_max            = findmax_array[0];
+  pgas_max = findmax_array[1];
+  betamax  = findmax_array[2];
+  betamin       = findmax_array_min[0];
+#endif
       std::cout << "beta_inp_initial=" << 2*pgas_max/b_sq_max << std::endl;
       std::cout << "beta_max_initial=" << betamax << std::endl;
       std::cout << "beta_min_initial=" << betamin << std::endl;
@@ -1730,6 +1741,17 @@ void Mesh::Initialize(int res_flag, ParameterInput *pin) {
         pmb->pbval->CheckUserBoundaries();//not sure if this is useful again, but we do modify stuff in postproblemgenerator...
       }
       FindMax(pin, b_sq_max, pgas_max, betamax, betamin);
+#ifdef MPI_PARALLEL
+  // pack array, MPI allreduce over array, then unpack into Mesh variables
+  Real findmax_array[3] = {b_sq_max, pgas_max, betamax};
+  Real findmax_array_min[1] = {betamin}; //<- this is probably hot garbage
+  MPI_Allreduce(MPI_IN_PLACE, findmax_array, 3, MPI_ATHENA_REAL, MPI_MAX, MPI_COMM_WORLD);
+  MPI_Allreduce(MPI_IN_PLACE, findmax_array_min, 1, MPI_ATHENA_REAL, MPI_MIN, MPI_COMM_WORLD);
+  b_sq_max            = findmax_array[0];
+  pgas_max = findmax_array[1];
+  betamax  = findmax_array[2];
+  betamin       = findmax_array_min[0];
+#endif
       std::cout << "beta_inp_renorm=" << 2*pgas_max/b_sq_max << std::endl;
       std::cout << "beta_max_renorm=" << betamax << std::endl;
       std::cout << "beta_min_renorm=" << betamin << std::endl;
