@@ -1703,10 +1703,29 @@ void Mesh::Initialize(int res_flag, ParameterInput *pin) {
   bool iflag = true;
   int inb = nbtotal;
   int nthreads = GetNumMeshThreads();
-  std::cout << nbtotal << std::endl;
-  std::cout << nblocal << std::endl;
   do {
     if (res_flag == 0) {
+#ifdef POSTPROBLEMGENERATOR
+      Real rhomax=INIT_MAX;
+      for(int i=0; i<nblocal; i++){
+        MeshBlock *pmb = my_blocks(i);
+        Real internalrhomax = INIT_MAX;
+        pmb->Rhomax(pin, internalrhomax);
+        if(internalrhomax > rhomax) rhomax = internalrhomax;
+      }
+#ifdef MPI_PARALLEL
+      // pack array, MPI allreduce over array, then unpack into Mesh variables
+      Real rhomaxarray[1] = {rhomax};
+      MPI_Allreduce(MPI_IN_PLACE, rhomaxarray, 1, MPI_ATHENA_REAL, MPI_MAX, MPI_COMM_WORLD);
+      rhomax = rhomaxarray[0];
+#endif
+      for(int i=0; i<nblocal; i++){
+        MeshBlock *pmb = my_blocks(i);
+        pmb->setRhoMax(rhomax);
+      }
+      std::cout << "rhomax_initial=" << rhomax << std::endl;
+#endif
+
 #pragma omp parallel for num_threads(nthreads)
       for (int i=0; i<nblocal; ++i) {
         MeshBlock *pmb = my_blocks(i);
@@ -1721,15 +1740,15 @@ void Mesh::Initialize(int res_flag, ParameterInput *pin) {
       Real betamax = 0;
       FindMax(pin, b_sq_max, pgas_max, betamax, betamin);
 #ifdef MPI_PARALLEL
-  // pack array, MPI allreduce over array, then unpack into Mesh variables
-  Real findmax_array[3] = {b_sq_max, pgas_max, betamax};
-  Real findmax_array_min[1] = {betamin}; //<- this is probably hot garbage
-  MPI_Allreduce(MPI_IN_PLACE, findmax_array, 3, MPI_ATHENA_REAL, MPI_MAX, MPI_COMM_WORLD);
-  MPI_Allreduce(MPI_IN_PLACE, findmax_array_min, 1, MPI_ATHENA_REAL, MPI_MIN, MPI_COMM_WORLD);
-  b_sq_max            = findmax_array[0];
-  pgas_max = findmax_array[1];
-  betamax  = findmax_array[2];
-  betamin       = findmax_array_min[0];
+      // pack array, MPI allreduce over array, then unpack into Mesh variables
+      Real findmax_array[3] = {b_sq_max, pgas_max, betamax};
+      Real findmax_array_min[1] = {betamin}; //<- this is probably hot garbage
+      MPI_Allreduce(MPI_IN_PLACE, findmax_array, 3, MPI_ATHENA_REAL, MPI_MAX, MPI_COMM_WORLD);
+      MPI_Allreduce(MPI_IN_PLACE, findmax_array_min, 1, MPI_ATHENA_REAL, MPI_MIN, MPI_COMM_WORLD);
+      b_sq_max            = findmax_array[0];
+      pgas_max = findmax_array[1];
+      betamax  = findmax_array[2];
+      betamin       = findmax_array_min[0];
 #endif
       std::cout << "beta_inp_initial=" << 2*pgas_max/b_sq_max << std::endl;
       std::cout << "beta_max_initial=" << betamax << std::endl;
@@ -1742,15 +1761,15 @@ void Mesh::Initialize(int res_flag, ParameterInput *pin) {
       }
       FindMax(pin, b_sq_max, pgas_max, betamax, betamin);
 #ifdef MPI_PARALLEL
-  // pack array, MPI allreduce over array, then unpack into Mesh variables
-  Real findmax_array2[3] = {b_sq_max, pgas_max, betamax};
-  Real findmax_array_min2[1] = {betamin}; //<- this is probably hot garbage
-  MPI_Allreduce(MPI_IN_PLACE, findmax_array2, 3, MPI_ATHENA_REAL, MPI_MAX, MPI_COMM_WORLD);
-  MPI_Allreduce(MPI_IN_PLACE, findmax_array_min2, 1, MPI_ATHENA_REAL, MPI_MIN, MPI_COMM_WORLD);
-  b_sq_max            = findmax_array2[0];
-  pgas_max = findmax_array2[1];
-  betamax  = findmax_array2[2];
-  betamin       = findmax_array_min2[0];
+      // pack array, MPI allreduce over array, then unpack into Mesh variables
+      Real findmax_array2[3] = {b_sq_max, pgas_max, betamax};
+      Real findmax_array_min2[1] = {betamin}; //<- this is probably hot garbage
+      MPI_Allreduce(MPI_IN_PLACE, findmax_array2, 3, MPI_ATHENA_REAL, MPI_MAX, MPI_COMM_WORLD);
+      MPI_Allreduce(MPI_IN_PLACE, findmax_array_min2, 1, MPI_ATHENA_REAL, MPI_MIN, MPI_COMM_WORLD);
+      b_sq_max            = findmax_array2[0];
+      pgas_max = findmax_array2[1];
+      betamax  = findmax_array2[2];
+      betamin       = findmax_array_min2[0];
 #endif
       std::cout << "beta_inp_renorm=" << 2*pgas_max/b_sq_max << std::endl;
       std::cout << "beta_max_renorm=" << betamax << std::endl;

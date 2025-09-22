@@ -89,7 +89,6 @@ void curlyF(Real x, Real x0, Real *out);
 void rhof(Real r, Real th, Real pgas_over_rho, Real *rho);
 void rhofraw(Real r, Real theta, Real pgas_over_rho, Real *rho);
 void pgas_over_rhof(Real r, Real log_h, Real *pgas_over_rho);
-void rhoMaxf(Mesh *pmy_mesh, Real *rhomax);
 Real ChristoffelSymbol(int a, int b, int c, Real r, Real sth);
 } // namespace
 
@@ -437,11 +436,6 @@ void MeshBlock::ProblemGenerator(ParameterInput *pin) {
     kl -= NGHOST;
     ku += NGHOST;
   }
-#ifdef THINDISK
-  rhoMaxf(pmy_mesh, &rho_amp);
-      //rho_amp*=1.2;
-  rho_amp = 1.0/rho_amp;
-#endif
   // Prepare scratch arrays
   AthenaArray<Real> &g = ruser_meshblock_data[0];
   AthenaArray<Real> &gi = ruser_meshblock_data[1];
@@ -642,8 +636,34 @@ void MeshBlock::ProblemGenerator(ParameterInput *pin) {
 #endif
   return;
 }
-
 #ifdef POSTPROBLEMGENERATOR
+void MeshBlock::Rhomax(ParameterInput *pin, Real& rhomax) {
+  MeshBlock* mb = this;
+      Coordinates* coords = mb->pcoord;
+      int is = mb->is;
+      int ie = mb->ie;
+      int js = mb->js;
+      int je = mb->je;
+      for(int j=0; j<coords->x2v.GetSize(); j++){
+        Real x2 = coords->x2v(j);
+        for(int i=0; i<coords->x1v.GetSize(); i++){
+          Real x1 = coords->x1v(i);
+          Real r, th, ph;
+          GetKerrSchildCoordinates(x1, x2, 0.0, &r, &th, &ph);
+
+          if (r < r_edge) continue;
+          Real rho;
+          rhofraw(r,th, 0.0, &rho);
+          if(rho > rhomax) rhomax=rho;
+        }
+      }
+}
+
+void MeshBlock::setRhoMax(Real rhomax) {
+#ifdef THINDISK
+  rho_amp = 1.0/rhomax;
+#endif
+}
 void MeshBlock::PostProblemGenerator(ParameterInput *pin, Real b_sq_max, Real pgas_max){
   // Prepare index bounds
   int il = is - NGHOST;
@@ -1987,32 +2007,33 @@ void rhofraw(Real r, Real theta, Real pgas_over_rho, Real *rho){
 }
 }
 
-// Only for modified initial conditions
-namespace {
-void rhoMaxf(Mesh *pmy_mesh, Real *rhomax){
-  int mbs = pmy_mesh->my_blocks.GetSize();
-  Real max = 0.0;
-  for(int a = 0; a<mbs; a++){
-    MeshBlock* mb = pmy_mesh->my_blocks(a);
-    Coordinates* coords = mb->pcoord;
-    int is = mb->is;
-    int ie = mb->ie;
-    int js = mb->js;
-    int je = mb->je;
-    for(int j=0; j<coords->x2v.GetSize(); j++){
-      Real x2 = coords->x2v(j);
-      for(int i=0; i<coords->x1v.GetSize(); i++){
-        Real x1 = coords->x1v(i);
-        Real r, th, ph;
-        GetKerrSchildCoordinates(x1, x2, 0.0, &r, &th, &ph);
 
-        if (r < r_edge) continue;
-        Real rho;
-        rhofraw(r,th, 0.0, &rho);
-        if(rho > max) max=rho;
-      }
-    }
-  }
-  *rhomax=max;//1e-11;
-}
-}
+//// Only for modified initial conditions
+//namespace {
+//void rhoMaxf(Mesh *pmy_mesh, Real *rhomax){
+//  int mbs = pmy_mesh->my_blocks.GetSize();
+//  Real max = 0.0;
+//  for(int a = 0; a<mbs; a++){
+//    MeshBlock* mb = pmy_mesh->my_blocks(a);
+//    Coordinates* coords = mb->pcoord;
+//    int is = mb->is;
+//    int ie = mb->ie;
+//    int js = mb->js;
+//    int je = mb->je;
+//    for(int j=0; j<coords->x2v.GetSize(); j++){
+//      Real x2 = coords->x2v(j);
+//      for(int i=0; i<coords->x1v.GetSize(); i++){
+//        Real x1 = coords->x1v(i);
+//        Real r, th, ph;
+//        GetKerrSchildCoordinates(x1, x2, 0.0, &r, &th, &ph);
+//
+//        if (r < r_edge) continue;
+//        Real rho;
+//        rhofraw(r,th, 0.0, &rho);
+//        if(rho > max) max=rho;
+//      }
+//    }
+//  }
+//  *rhomax=max;//1e-11;
+//}
+//}

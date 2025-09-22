@@ -198,6 +198,8 @@ class MeshBlock {
 #ifdef POSTPROBLEMGENERATOR
   //void FindMax(ParameterInput *pin);
   void PostProblemGenerator(ParameterInput *pin, Real b_sq_max, Real pgas_max);
+  void Rhomax(ParameterInput *pin, Real& rhomax);
+  void setRhoMax(Real rhomax);
 #endif
   void InitUserMeshBlockData(ParameterInput *pin);
 
