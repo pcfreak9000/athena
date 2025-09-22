@@ -35,7 +35,7 @@
 #error "This problem generator must be used with general relativity"
 #endif
 
-#define THINDISK
+//#define THINDISK
 
 #define THETA0 0.001
 //this constant doesn't really have an influence, rho is renormalized anyways
@@ -638,15 +638,27 @@ void MeshBlock::ProblemGenerator(ParameterInput *pin) {
 }
 #ifdef POSTPROBLEMGENERATOR
 void MeshBlock::Rhomax(ParameterInput *pin, Real& rhomax) {
+#ifdef THINDISK
   MeshBlock* mb = this;
       Coordinates* coords = mb->pcoord;
-      int is = mb->is;
-      int ie = mb->ie;
-      int js = mb->js;
-      int je = mb->je;
-      for(int j=0; j<coords->x2v.GetSize(); j++){
+      // Prepare index bounds
+            int il = is - NGHOST;
+            int iu = ie + NGHOST;
+            int jl = js;
+            int ju = je;
+            if (block_size.nx2 > 1) {
+              jl -= NGHOST;
+              ju += NGHOST;
+            }
+            int kl = ks;
+            int ku = ke;
+            if (block_size.nx3 > 1) {
+              kl -= NGHOST;
+              ku += NGHOST;
+            }
+      for(int j=jl; j<=ju; j++){
         Real x2 = coords->x2v(j);
-        for(int i=0; i<coords->x1v.GetSize(); i++){
+        for(int i=il; i<=iu; i++){
           Real x1 = coords->x1v(i);
           Real r, th, ph;
           GetKerrSchildCoordinates(x1, x2, 0.0, &r, &th, &ph);
@@ -657,6 +669,9 @@ void MeshBlock::Rhomax(ParameterInput *pin, Real& rhomax) {
           if(rho > rhomax) rhomax=rho;
         }
       }
+#else
+      rhomax=-1;
+#endif
 }
 
 void MeshBlock::setRhoMax(Real rhomax) {
@@ -666,20 +681,20 @@ void MeshBlock::setRhoMax(Real rhomax) {
 }
 void MeshBlock::PostProblemGenerator(ParameterInput *pin, Real b_sq_max, Real pgas_max){
   // Prepare index bounds
-  int il = is - NGHOST;
-  int iu = ie + NGHOST;
-  int jl = js;
-  int ju = je;
-  if (block_size.nx2 > 1) {
-    jl -= NGHOST;
-    ju += NGHOST;
-  }
-  int kl = ks;
-  int ku = ke;
-  if (block_size.nx3 > 1) {
-    kl -= NGHOST;
-    ku += NGHOST;
-  }
+    int il = is - NGHOST;
+    int iu = ie + NGHOST;
+    int jl = js;
+    int ju = je;
+    if (block_size.nx2 > 1) {
+      jl -= NGHOST;
+      ju += NGHOST;
+    }
+    int kl = ks;
+    int ku = ke;
+    if (block_size.nx3 > 1) {
+      kl -= NGHOST;
+      ku += NGHOST;
+    }
   if(b_sq_max!=0.0 && MAGNETIC_FIELDS_ENABLED){
     Real b_sq_new = 2 * pgas_max/betainp;
     Real renorm = std::sqrt(b_sq_new/b_sq_max);

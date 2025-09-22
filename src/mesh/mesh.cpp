@@ -1622,7 +1622,7 @@ void Mesh::FindMax(ParameterInput *pin, Real& b_sq_max, Real& pgas_max, Real& be
   //find max B_sq over all meshblocks
   // Prepare scratch arrays
 
-  int mbs = nblocal;//my_blocks.GetSize();
+  int mbs = nblocal; //my_blocks.GetSize();
   betamax = INIT_MAX;
   betamin = INIT_MIN;
   b_sq_max = INIT_MAX;
@@ -1638,10 +1638,27 @@ void Mesh::FindMax(ParameterInput *pin, Real& b_sq_max, Real& pgas_max, Real& be
     int ie = mb->ie;
     int js = mb->js;
     int je = mb->je;
-    for(int k=0; k<coords->x3v.GetSize(); k++){
-      for(int j=0; j<coords->x2v.GetSize(); j++){
-        coords->CellMetric(k, j, 0, coords->x1v.GetSize()-1, g, gi);
-        for(int i=0; i<coords->x1v.GetSize(); i++){
+    int ks = mb->ks;
+    int ke = mb->ke;
+    // Prepare index bounds
+      int il = is - NGHOST;
+      int iu = ie + NGHOST;
+      int jl = js;
+      int ju = je;
+      if (block_size.nx2 > 1) {
+        jl -= NGHOST;
+        ju += NGHOST;
+      }
+      int kl = ks;
+      int ku = ke;
+      if (block_size.nx3 > 1) {
+        kl -= NGHOST;
+        ku += NGHOST;
+      }
+    for(int k=kl; k<=ku; k++){
+      for(int j=jl; j<=ju; j++){
+        coords->CellMetric(k, j, il, iu, g, gi);
+        for(int i=il; i<=iu; i++){
 
           Real pg = phydro->w(IPR,k,j,i);
           if(pg > pgas_max) pgas_max = pg;
@@ -1745,10 +1762,10 @@ void Mesh::Initialize(int res_flag, ParameterInput *pin) {
       Real findmax_array_min[1] = {betamin}; //<- this is probably hot garbage
       MPI_Allreduce(MPI_IN_PLACE, findmax_array, 3, MPI_ATHENA_REAL, MPI_MAX, MPI_COMM_WORLD);
       MPI_Allreduce(MPI_IN_PLACE, findmax_array_min, 1, MPI_ATHENA_REAL, MPI_MIN, MPI_COMM_WORLD);
-      b_sq_max            = findmax_array[0];
+      b_sq_max = findmax_array[0];
       pgas_max = findmax_array[1];
-      betamax  = findmax_array[2];
-      betamin       = findmax_array_min[0];
+      betamax = findmax_array[2];
+      betamin = findmax_array_min[0];
 #endif
       std::cout << "beta_inp_initial=" << 2*pgas_max/b_sq_max << std::endl;
       std::cout << "beta_max_initial=" << betamax << std::endl;
@@ -1766,10 +1783,10 @@ void Mesh::Initialize(int res_flag, ParameterInput *pin) {
       Real findmax_array_min2[1] = {betamin}; //<- this is probably hot garbage
       MPI_Allreduce(MPI_IN_PLACE, findmax_array2, 3, MPI_ATHENA_REAL, MPI_MAX, MPI_COMM_WORLD);
       MPI_Allreduce(MPI_IN_PLACE, findmax_array_min2, 1, MPI_ATHENA_REAL, MPI_MIN, MPI_COMM_WORLD);
-      b_sq_max            = findmax_array2[0];
+      b_sq_max = findmax_array2[0];
       pgas_max = findmax_array2[1];
-      betamax  = findmax_array2[2];
-      betamin       = findmax_array_min2[0];
+      betamax = findmax_array2[2];
+      betamin = findmax_array_min2[0];
 #endif
       std::cout << "beta_inp_renorm=" << 2*pgas_max/b_sq_max << std::endl;
       std::cout << "beta_max_renorm=" << betamax << std::endl;
