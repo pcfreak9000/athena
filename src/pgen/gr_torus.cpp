@@ -704,10 +704,10 @@ void MeshBlock::PostProblemGenerator(ParameterInput *pin, Real b_sq_max, Real pg
           pfield->b.x1f(k,j,i) *= renorm;
           pfield->b.x2f(k,j,i) *= renorm;
           pfield->b.x3f(k,j,i) *= renorm;
-  //          pfield->bcc(IB1,k,j,i)*=renorm;
-  //          pfield->bcc(IB2,k,j,i)*=renorm;
-  //          pfield->bcc(IB3,k,j,i)*=renorm;
-
+//            pfield->bcc(IB1,k,j,i)*=renorm;
+//            pfield->bcc(IB2,k,j,i)*=renorm;
+//            pfield->bcc(IB3,k,j,i)*=renorm;
+//wtf? somethign fishy is going on, the above should be equivalent to the outcome of calccellcenteredfields applied to b.x-f, but it is not???
           //calculate four-B-field in this cell for face centered magnetic fields. Actually not required, normalization factor goes through
           //renormalize B_field with sqrt(B_sq)_new/sqrt(B_sq)_old
           //calculate projected three-B-field from projection,put it back into the array??? First part actually not required...

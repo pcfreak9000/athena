@@ -382,8 +382,8 @@ class Mesh {
   MGMaskFunc MGCRDiffusionSourceMaskFunction_;
   MGMaskFunc MGCRDiffusionCoeffMaskFunction_;
 #ifdef POSTPROBLEMGENERATOR
-  void FindMax(ParameterInput *pin, Real& b_sq_max, Real& pgas_max, Real& betamax, Real& betamin);
-  void FindMaxInternal(int i, int j, int k, Hydro* phydro, Field* pfield, Coordinates* coords, AthenaArray<Real> &g, AthenaArray<Real> &gi, Real& pgas_max, Real& b_sq_max, Real& betamax, Real& betamin);
+  void FindMax(ParameterInput *pin, Real& b_sq_max, Real& pgas_max, Real& betamax, Real& betamin, bool usebcc);
+  void FindMaxInternal(int i, int j, int k, Hydro* phydro, Field* pfield, Coordinates* coords, AthenaArray<Real> &g, AthenaArray<Real> &gi, Real& pgas_max, Real& b_sq_max, Real& betamax, Real& betamin, bool usebcc);
 #endif
   void AllocateRealUserMeshDataField(int n);
   void AllocateIntUserMeshDataField(int n);

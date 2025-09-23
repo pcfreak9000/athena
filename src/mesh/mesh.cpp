@@ -1618,7 +1618,7 @@ void Mesh::ApplyUserWorkBeforeOutput(ParameterInput *pin) {
 
 #ifdef POSTPROBLEMGENERATOR
 
-void Mesh::FindMaxInternal(int i, int j, int k, Hydro* phydro, Field* pfield, Coordinates* coords, AthenaArray<Real> &g, AthenaArray<Real> &gi, Real& pgas_max, Real& b_sq_max, Real& betamax, Real& betamin){
+void Mesh::FindMaxInternal(int i, int j, int k, Hydro* phydro, Field* pfield, Coordinates* coords, AthenaArray<Real> &g, AthenaArray<Real> &gi, Real& pgas_max, Real& b_sq_max, Real& betamax, Real& betamin, bool usebcc){
   Real pg = phydro->w(IPR,k,j,i);
   if(pg > pgas_max) pgas_max = pg;
   // Calculate normal-frame Lorentz factor
@@ -1644,16 +1644,19 @@ void Mesh::FindMaxInternal(int i, int j, int k, Hydro* phydro, Field* pfield, Co
   Real b0 = 0.0, b1 = 0.0, b2 = 0.0, b3 = 0.0;
   Real b_0 = 0.0, b_1 = 0.0, b_2 = 0.0, b_3 = 0.0;
   if (MAGNETIC_FIELDS_ENABLED) {
-    //doesn't work properly:
-//              bb1 = pfield->bcc(IB1,k,j,i);
-//              bb2 = pfield->bcc(IB2,k,j,i);
-//              bb3 = pfield->bcc(IB3,k,j,i);
-    //technically we are still missing x1f(k,j,i+1), x2f(k,j+1,i) etc, but idk how to add this properly.
-    //Also, why does only the b_b component at b index max have a field at all while the other two are not specified?
-    //another option is to calculate these things using both b.x-f and bcc
-    bb1 = pfield->b.x1f(k,j,i);
-    bb2 = pfield->b.x2f(k,j,i);
-    bb3 = pfield->b.x3f(k,j,i);
+    if(usebcc){
+      bb1 = pfield->bcc(IB1,k,j,i);
+      bb2 = pfield->bcc(IB2,k,j,i);
+      bb3 = pfield->bcc(IB3,k,j,i);
+    }else{
+      //technically we are still missing x1f(k,j,i+1), x2f(k,j+1,i) etc, but idk how to add this properly.
+      //Also, why does only the b_b component at b index max have a field at all while the other two are not specified?
+      //another option is to calculate these things using both b.x-f and bcc
+      //maybe add an option to at least check using bcc?? -> done
+      bb1 = pfield->b.x1f(k,j,i);
+      bb2 = pfield->b.x2f(k,j,i);
+      bb3 = pfield->b.x3f(k,j,i);
+    }
     b0 = u_1 * bb1 + u_2 * bb2 + u_3 * bb3;
     b1 = (bb1 + b0 * u1) / u0;
     b2 = (bb2 + b0 * u2) / u0;
@@ -1669,7 +1672,7 @@ void Mesh::FindMaxInternal(int i, int j, int k, Hydro* phydro, Field* pfield, Co
   if(beta < betamin && b_sq != 0.0) betamin = beta;
 }
 
-void Mesh::FindMax(ParameterInput *pin, Real& b_sq_max, Real& pgas_max, Real& betamax, Real& betamin) {
+void Mesh::FindMax(ParameterInput *pin, Real& b_sq_max, Real& pgas_max, Real& betamax, Real& betamin, bool usebcc) {
   //calc B_sq using formula from UserWorkInLoop
   //find max B_sq over all meshblocks
 
@@ -1711,7 +1714,7 @@ void Mesh::FindMax(ParameterInput *pin, Real& b_sq_max, Real& pgas_max, Real& be
       for(int j=jl; j<=ju; j++){
         coords->CellMetric(k, j, il, iu, g, gi);
         for(int i=il; i<=iu; i++){
-          FindMaxInternal(i,j,k,phydro, pfield, coords, g, gi, pgas_max, b_sq_max, betamax, betamin);
+          FindMaxInternal(i,j,k,phydro, pfield, coords, g, gi, pgas_max, b_sq_max, betamax, betamin, usebcc);
         }
       }
     }
@@ -1731,6 +1734,7 @@ void Mesh::Initialize(int res_flag, ParameterInput *pin) {
     if (res_flag == 0) {
 #ifdef POSTPROBLEMGENERATOR
       Real rhomax=INIT_MAX;
+      //not in parallel
       for(int i=0; i<nblocal; i++){
         MeshBlock *pmb = my_blocks(i);
         Real internalrhomax = INIT_MAX;
@@ -1762,11 +1766,11 @@ void Mesh::Initialize(int res_flag, ParameterInput *pin) {
       Real pgas_max = 0;
       Real betamin = 0;
       Real betamax = 0;
-      FindMax(pin, b_sq_max, pgas_max, betamax, betamin);
+      FindMax(pin, b_sq_max, pgas_max, betamax, betamin, true);
 #ifdef MPI_PARALLEL
       // pack array, MPI allreduce over array, then unpack into Mesh variables
       Real findmax_array[3] = {b_sq_max, pgas_max, betamax};
-      Real findmax_array_min[1] = {betamin}; //<- this is probably hot garbage
+      Real findmax_array_min[1] = {betamin}; //<- this is probably not good
       MPI_Allreduce(MPI_IN_PLACE, findmax_array, 3, MPI_ATHENA_REAL, MPI_MAX, MPI_COMM_WORLD);
       MPI_Allreduce(MPI_IN_PLACE, findmax_array_min, 1, MPI_ATHENA_REAL, MPI_MIN, MPI_COMM_WORLD);
       b_sq_max = findmax_array[0];
@@ -1775,6 +1779,8 @@ void Mesh::Initialize(int res_flag, ParameterInput *pin) {
       betamin = findmax_array_min[0];
 #endif
       std::cout << "beta_inp_initial=" << 2*pgas_max/b_sq_max << std::endl;
+      std::cout << "pgas_initial=" << pgas_max << std::endl;
+      std::cout << "b_sq_max_initial=" << b_sq_max << std::endl;
       std::cout << "beta_max_initial=" << betamax << std::endl;
       std::cout << "beta_min_initial=" << betamin << std::endl;
 #pragma omp parallel for num_threads(nthreads)
@@ -1783,11 +1789,11 @@ void Mesh::Initialize(int res_flag, ParameterInput *pin) {
         pmb->PostProblemGenerator(pin, b_sq_max, pgas_max);
         pmb->pbval->CheckUserBoundaries();//not sure if this is useful again, but we do modify stuff in postproblemgenerator...
       }
-      FindMax(pin, b_sq_max, pgas_max, betamax, betamin);
+      FindMax(pin, b_sq_max, pgas_max, betamax, betamin, false);
 #ifdef MPI_PARALLEL
       // pack array, MPI allreduce over array, then unpack into Mesh variables
       Real findmax_array2[3] = {b_sq_max, pgas_max, betamax};
-      Real findmax_array_min2[1] = {betamin}; //<- this is probably hot garbage
+      Real findmax_array_min2[1] = {betamin}; //<- this is probably not good
       MPI_Allreduce(MPI_IN_PLACE, findmax_array2, 3, MPI_ATHENA_REAL, MPI_MAX, MPI_COMM_WORLD);
       MPI_Allreduce(MPI_IN_PLACE, findmax_array_min2, 1, MPI_ATHENA_REAL, MPI_MIN, MPI_COMM_WORLD);
       b_sq_max = findmax_array2[0];
@@ -1796,8 +1802,28 @@ void Mesh::Initialize(int res_flag, ParameterInput *pin) {
       betamin = findmax_array_min2[0];
 #endif
       std::cout << "beta_inp_renorm=" << 2*pgas_max/b_sq_max << std::endl;
+      std::cout << "pgas_renorm=" << pgas_max << std::endl;
+      std::cout << "b_sq_max_renorm=" << b_sq_max << std::endl;
       std::cout << "beta_max_renorm=" << betamax << std::endl;
       std::cout << "beta_min_renorm=" << betamin << std::endl;
+      FindMax(pin, b_sq_max, pgas_max, betamax, betamin, true);
+#ifdef MPI_PARALLEL
+      // pack array, MPI allreduce over array, then unpack into Mesh variables
+      Real findmax_array2bcc[3] = {b_sq_max, pgas_max, betamax};
+      Real findmax_array_min2bcc[1] = {betamin}; //<- this is probably not good
+      MPI_Allreduce(MPI_IN_PLACE, findmax_array2bcc, 3, MPI_ATHENA_REAL, MPI_MAX, MPI_COMM_WORLD);
+      MPI_Allreduce(MPI_IN_PLACE, findmax_array_min2bcc, 1, MPI_ATHENA_REAL, MPI_MIN, MPI_COMM_WORLD);
+      b_sq_max = findmax_array2bcc[0];
+      pgas_max = findmax_array2bcc[1];
+      betamax = findmax_array2bcc[2];
+      betamin = findmax_array_min2bcc[0];
+#endif
+      //there is a more or less significant deviation between bcc and b.x-f after the renormalization, but apparently not before, but why?
+      std::cout << "beta_inp_renorm_bcc=" << 2*pgas_max/b_sq_max << std::endl;
+      std::cout << "pgas_renorm_bcc=" << pgas_max << std::endl;
+      std::cout << "b_sq_max_renorm_bcc=" << b_sq_max << std::endl;
+      std::cout << "beta_max_renorm_bcc=" << betamax << std::endl;
+      std::cout << "beta_min_renorm_bcc=" << betamin << std::endl;
 #endif
     }
 
