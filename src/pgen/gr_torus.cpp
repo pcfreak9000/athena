@@ -35,7 +35,7 @@
 #error "This problem generator must be used with general relativity"
 #endif
 
-//#define THINDISK
+#define THINDISK
 
 #define THETA0 0.001
 //this constant doesn't really have an influence, rho is renormalized anyways
@@ -619,18 +619,18 @@ void MeshBlock::ProblemGenerator(ParameterInput *pin) {
         }
       }
     }
-#ifndef POSTPROBLEMGENERATOR
+//#ifndef POSTPROBLEMGENERATOR
     // Calculate cell-centered magnetic field
     pfield->CalculateCellCenteredField(pfield->b, pfield->bcc, pcoord, il, iu, jl, ju, kl,
                                        ku);
-#endif
+//#endif
   }
 
-#ifndef POSTPROBLEMGENERATOR
+//#ifndef POSTPROBLEMGENERATOR
   // Initialize conserved values
   peos->PrimitiveToConserved(phydro->w, pfield->bcc, phydro->u, pcoord, il, iu, jl, ju,
       kl, ku);
-
+#ifndef POSTPROBLEMGENERATOR
   // Call user work function to set output variables
   UserWorkInLoop();
 #endif
@@ -717,17 +717,17 @@ void MeshBlock::PostProblemGenerator(ParameterInput *pin, Real b_sq_max, Real pg
         }
       }
     }
-    pfield->b.x1f(ku+1,ju,iu) *= renorm;
-    pfield->b.x2f(ku+1,ju,iu) *= renorm;
+//    pfield->b.x1f(ku+1,ju,iu) *= renorm;
+//    pfield->b.x2f(ku+1,ju,iu) *= renorm;
     pfield->b.x3f(ku+1,ju,iu) *= renorm;
 
-    pfield->b.x1f(ku,ju+1,iu) *= renorm;
+//    pfield->b.x1f(ku,ju+1,iu) *= renorm;
     pfield->b.x2f(ku,ju+1,iu) *= renorm;
-    pfield->b.x3f(ku,ju+1,iu) *= renorm;
+//    pfield->b.x3f(ku,ju+1,iu) *= renorm;
 
     pfield->b.x1f(ku,ju,iu+1) *= renorm;
-    pfield->b.x2f(ku,ju,iu+1) *= renorm;
-    pfield->b.x3f(ku,ju,iu+1) *= renorm;
+//    pfield->b.x2f(ku,ju,iu+1) *= renorm;
+//    pfield->b.x3f(ku,ju,iu+1) *= renorm;
   }
   if(MAGNETIC_FIELDS_ENABLED) {
   // Calculate cell-centered magnetic field
