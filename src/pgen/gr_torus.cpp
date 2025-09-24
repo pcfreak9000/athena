@@ -681,20 +681,20 @@ void MeshBlock::setRhoMax(Real rhomax) {
 }
 void MeshBlock::PostProblemGenerator(ParameterInput *pin, Real b_sq_max, Real pgas_max){
   // Prepare index bounds
-    int il = is - NGHOST;
-    int iu = ie + NGHOST;
-    int jl = js;
-    int ju = je;
-    if (block_size.nx2 > 1) {
-      jl -= NGHOST;
-      ju += NGHOST;
-    }
-    int kl = ks;
-    int ku = ke;
-    if (block_size.nx3 > 1) {
-      kl -= NGHOST;
-      ku += NGHOST;
-    }
+  int il = is - NGHOST;
+  int iu = ie + NGHOST;
+  int jl = js;
+  int ju = je;
+  if (block_size.nx2 > 1) {
+    jl -= NGHOST;
+    ju += NGHOST;
+  }
+  int kl = ks;
+  int ku = ke;
+  if (block_size.nx3 > 1) {
+    kl -= NGHOST;
+    ku += NGHOST;
+  }
   if(b_sq_max!=0.0 && MAGNETIC_FIELDS_ENABLED){
     Real b_sq_new = 2 * pgas_max/betainp;
     Real renorm = std::sqrt(b_sq_new/b_sq_max);
@@ -704,10 +704,12 @@ void MeshBlock::PostProblemGenerator(ParameterInput *pin, Real b_sq_max, Real pg
           pfield->b.x1f(k,j,i) *= renorm;
           pfield->b.x2f(k,j,i) *= renorm;
           pfield->b.x3f(k,j,i) *= renorm;
-//            pfield->bcc(IB1,k,j,i)*=renorm;
-//            pfield->bcc(IB2,k,j,i)*=renorm;
-//            pfield->bcc(IB3,k,j,i)*=renorm;
-//wtf? somethign fishy is going on, the above should be equivalent to the outcome of calccellcenteredfields applied to b.x-f, but it is not???
+          pfield->bcc(IB1,k,j,i)*=renorm;
+          pfield->bcc(IB2,k,j,i)*=renorm;
+          pfield->bcc(IB3,k,j,i)*=renorm;
+          //WTF???? I have np idea why renprming x-f doesnt work for bcc as well, CalculateCellCenteredFields should ne linear!But somehow proper results are only achieved using the above.
+          //no idea if this works properly, lets hope it does
+          //wtf? somethign fishy is going on, the above should be equivalent to the outcome of calccellcenteredfields applied to b.x-f, but it is not???
           //calculate four-B-field in this cell for face centered magnetic fields. Actually not required, normalization factor goes through
           //renormalize B_field with sqrt(B_sq)_new/sqrt(B_sq)_old
           //calculate projected three-B-field from projection,put it back into the array??? First part actually not required...
@@ -717,25 +719,25 @@ void MeshBlock::PostProblemGenerator(ParameterInput *pin, Real b_sq_max, Real pg
         }
       }
     }
-//    pfield->b.x1f(ku+1,ju,iu) *= renorm;
-//    pfield->b.x2f(ku+1,ju,iu) *= renorm;
+    //    pfield->b.x1f(ku+1,ju,iu) *= renorm;
+    //    pfield->b.x2f(ku+1,ju,iu) *= renorm;
     pfield->b.x3f(ku+1,ju,iu) *= renorm;
 
-//    pfield->b.x1f(ku,ju+1,iu) *= renorm;
+    //    pfield->b.x1f(ku,ju+1,iu) *= renorm;
     pfield->b.x2f(ku,ju+1,iu) *= renorm;
-//    pfield->b.x3f(ku,ju+1,iu) *= renorm;
+    //    pfield->b.x3f(ku,ju+1,iu) *= renorm;
 
     pfield->b.x1f(ku,ju,iu+1) *= renorm;
-//    pfield->b.x2f(ku,ju,iu+1) *= renorm;
-//    pfield->b.x3f(ku,ju,iu+1) *= renorm;
+    //    pfield->b.x2f(ku,ju,iu+1) *= renorm;
+    //    pfield->b.x3f(ku,ju,iu+1) *= renorm;
   }
   if(MAGNETIC_FIELDS_ENABLED) {
-  // Calculate cell-centered magnetic field
-    pfield->CalculateCellCenteredField(pfield->b, pfield->bcc, pcoord, il, iu, jl, ju, kl, ku);
+    // Calculate cell-centered magnetic field. see notice above
+    //pfield->CalculateCellCenteredField(pfield->b, pfield->bcc, pcoord, il, iu, jl, ju, kl, ku);
   }
   // (Re-)Initialize conserved values
   peos->PrimitiveToConserved(phydro->w, pfield->bcc, phydro->u, pcoord, il, iu, jl, ju,
-        kl, ku);
+      kl, ku);
 
   // Call user work function to set output variables
   UserWorkInLoop();
