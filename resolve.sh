@@ -41,4 +41,5 @@ vis/python/plot_spherical.py "$local_target_dir"/tavg.athdf rho "$local_target_d
 vis/python/plot_spherical.py "$local_target_dir"/tavg.athdf rho --logc "$local_target_dir"/rho_tavg_log.png
 cd "$local_target_dir"
 gnuplot -e "set terminal png size 1000,1000; set output 'plot_dshapes.png'; set xrange[0:$x1max]; set yrange[0:$x1max]; plot \"dshape0.3.csv\", \"dshape0.2.csv\", \"dshape0.1.csv\", \"dshape0.02.csv\", \"dshape0.01.csv\";" 
+gnuplot -e "set terminal png size 1000,1000; set output 'plot_qf.png'; set xrange[0:30000]; set yrange[0:20]; plot \"savg.csv\" using 1:2, \"savg.csv\" using 1:3, \"savg.csv\" using 1:4;"
 echo "Done."
