@@ -46,7 +46,7 @@
 #define M_PARAM 0.1
 
 
-#define TARGET_Kc 0.00069
+#define TARGET_Kc 0.0069
 
 
 // Declarations
