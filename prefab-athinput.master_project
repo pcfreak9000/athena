@@ -9,7 +9,7 @@ problem_id = master_project  # problem ID: base name of output files
 cfl_number = 0.3  # factor multiplying shortest cell crossing time
 nlim       = -1   # maximum simulation steps
 tlim       = {TIME}  # maximum simulation time
-integrator = rk4  # time integration algorithm
+integrator = rk3  # time integration algorithm
 xorder     = 3    # order of spatial reconstruction
 ncycle_out = 400    # interval for stdout summary info
 
@@ -31,7 +31,7 @@ dt = {O_DT}
 
 <mesh>
 num_threads = 1
-refinement = static
+refinement = none
 
 # radial coordinate in global root grid
 nx1    = 128                  # number of cells
@@ -102,7 +102,7 @@ gamma_max = 50.0
 <problem>
 beta_inp = {BETA_INP}
 # torus parameters
-theta_nocool = 0.1
+theta_nocool = 0.3
 prograde   = true    # flag indicating disk is prograde
 r_edge     = {R_EDGE}     # radius of inner edge of disk
 r_peak     = {R_PEAK}    # radius of pressure maximum; use l instead if negative
