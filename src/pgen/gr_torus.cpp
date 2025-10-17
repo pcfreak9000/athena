@@ -41,7 +41,7 @@
 //this constant doesn't really have an influence, rho is renormalized anyways
 #define K_ENTROPY 0.1
 
-#define H_ASPECT 0.05
+#define H_ASPECT 0.07
 
 #define M_PARAM 0.1
 
