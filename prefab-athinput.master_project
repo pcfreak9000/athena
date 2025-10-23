@@ -34,7 +34,7 @@ num_threads = 1
 refinement = static
 
 # radial coordinate in global root grid
-nx1    = 128                  # number of cells
+nx1    = 144                  # number of cells
 x1min  = {HORIZON} #1.7811841172555203  # minimum
 x1max  = 60.0                # maximum
 x1rat  = 1.0476319576931545  # ratio of adjacent widths
@@ -42,7 +42,7 @@ ix1_bc = user                # inner boundary
 ox1_bc = user                # outer boundary
 
 # polar coordinate in global root grid
-nx2    = 128                  # number of cells in direction
+nx2    = 144                  # number of cells in direction
 x2min  = 0.0                 # minimum
 x2max  = 3.1415926535897932  # maximum
 x2rat  = 1.0                 # ration of adjacent cell widths
