@@ -86,14 +86,17 @@ def main(**kwargs):
     u1 = [0.0]
     u2 = [0.0]
     u3 = [0.0]
+    horizon = 1.0 * (1.0 + math.sqrt(1.0 - (a/1.0)**2))
     for rInd in range(0, rcoords.shape[0]):
         #print(len(rcoords))
         thtop, interpol = getThetaTop(rInd, rho, rcoords, thcoords, thbord, a, tau_factor)
         # interpol = 0.5
         # heights in geometric units
         if thtop == -1:
-            #xs.append(rcoords[rInd])
-            xs.append(math.sqrt(rcoords[rInd]**2 + a*a))
+            if not kwargs['visualize']:
+                xs.append(math.sqrt(rcoords[rInd]**2 + a*a))
+            else:
+                xs.append(rcoords[rInd])
             ys.append(0.0)
             densities.append(0.0)
             u0.append(0.0)
@@ -101,9 +104,14 @@ def main(**kwargs):
             u2.append(0.0)
             u3.append(0.0)
         else:
-            xs.append(math.sqrt(rcoords[rInd]**2 + a*a) * math.sin(getFromBorderIndex(thcoords, thtop, interpol)))
-            #xs.append(rcoords[rInd])
-            ytoappend = rcoords[rInd] * math.cos(getFromBorderIndex(thcoords, thtop, interpol))
+            if not kwargs['visualize']:
+                xs.append(math.sqrt(rcoords[rInd]**2 + a*a) * math.sin(getFromBorderIndex(thcoords, thtop, interpol)))
+            else:
+                xs.append(rcoords[rInd])
+            if rcoords[rInd] < horizon:
+                ytoappend = 0.0
+            else:
+                ytoappend = rcoords[rInd] * math.cos(getFromBorderIndex(thcoords, thtop, interpol))
             if ytoappend < 0.0:
                 print("negative y should not occur at this place")
                 ytoappend = 0.0
@@ -147,5 +155,6 @@ if __name__ == '__main__':
     parser.add_argument('x3max', type=float, help='x3max')
     parser.add_argument('mdt', type=float, help='mdot target')
     parser.add_argument('mdc', type=float, help='mdot code')
+    parser.add_argument('-v', '--visualize', action='store_true')
     args = parser.parse_args()
     main(**vars(args))
