@@ -11,7 +11,7 @@ if [ ! -d "$2" ]; then
 fi
 
 exshape () {
-    vis/python/extract_shape.py "$local_target_dir"/tavg.athdf "$local_target_dir"/dshape"$1".csv "$spin" "$x3min" "$x3max" "$1" "$avgmdot"
+    vis/python/extract_shape.py "$local_target_dir"/tavg.athdf "$local_target_dir"/dshape"$1$2".csv "$spin" "$x3min" "$x3max" "$1" "$avgmdot" $2
 }
 
 
@@ -30,16 +30,21 @@ echo "X3max: $x3max"
 echo "Avg mdot_code: $avgmdot"
 #calculate surface shape
 echo "Constructing shape(s)..."
+exshape 0.3 -v
 exshape 0.3
+exshape 0.2 -v
 exshape 0.2
+exshape 0.1 -v
 exshape 0.1
+exshape 0.02 -v
 exshape 0.02
+exshape 0.01 -v
 exshape 0.01
 #plot tavg.athdf rho --logc and maybe additional pngs?
 echo "Generating additional plots..."
 vis/python/plot_spherical.py "$local_target_dir"/tavg.athdf rho --colormap=jet "$local_target_dir"/rho_tavg.png
 vis/python/plot_spherical.py "$local_target_dir"/tavg.athdf rho --colormap=jet --logc "$local_target_dir"/rho_tavg_log.png
 cd "$local_target_dir"
-gnuplot -e "set terminal png size 1000,1000; set output 'plot_dshapes.png'; set xrange[0:$x1max]; set yrange[0:$x1max]; plot \"dshape0.3.csv\", \"dshape0.2.csv\", \"dshape0.1.csv\", \"dshape0.02.csv\", \"dshape0.01.csv\";" 
+gnuplot -e "set terminal png size 1000,1000; set output 'plot_dshapes.png'; set xrange[0:$x1max]; set yrange[0:$x1max]; plot \"dshape0.3-v.csv\" with line, \"dshape0.2-v.csv\" with line, \"dshape0.1-v.csv\" with line, \"dshape0.02-v.csv\" with line, \"dshape0.01-v.csv\" with line;" 
 gnuplot -e "set terminal png size 1000,1000; set output 'plot_qf.png'; set xrange[0:30000]; set yrange[0:20]; plot \"savg.csv\" using 1:2, \"savg.csv\" using 1:3, \"savg.csv\" using 1:4;"
 echo "Done."
