@@ -24,7 +24,7 @@ TIMELIMIT_RSTFILE=100000:00:00
 if [ "$BINAC2" ]; then
     WORKDIR="$WORK"/"$MYNAME"
 else
-    WORKDIR="$(pwd)"/Gartenzwerg/"$MYNAME"
+    WORKDIR="$HOME"/Gartenzwerg/"$MYNAME"
 fi
 if [ ! -d "$WORKDIR" ]; then
     echo "can't execute, workdir not present"
