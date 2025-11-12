@@ -24,8 +24,12 @@ mkdir -p "$local_target_dir"
 function copy() {
     scp binac2:"$binac_work"/"$binac_target_dir"/"$1" "$local_target_dir"/"$2"
     if [ $? -ne 0 ]; then
-        echo "problem with scp"
-        exit 1
+        if [ "$3" = "" ]; then
+            echo "problem with scp"
+            exit 1
+        else
+            echo "Ignoring error with scp..."
+        fi
     fi
 }
 copy "simout/master_project.prim.00000.athdf" "initial_conditions.athdf"
@@ -42,4 +46,4 @@ copy "LOG_ATHENA" "LOG_ATHENA"
 copy "athinput.pp_master_project" "athinput"
 copy "mdot.csv" "mdot_deprecated.csv"
 
-
+copy "analimits" "analimits" ignoreerrors
