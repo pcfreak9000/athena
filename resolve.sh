@@ -8,9 +8,13 @@ hstfileindex=13
 if [ ! -d "$2" ]; then
     echo "Retrieving..."
     ./retrieve.sh "$1" "$2"
+    if [ $? -ne 0 ]; then
+        echo "Error while retrieving, aborting"
+        exit 1
+    fi
 fi
 
-if [ "$minrange" = "" ] || [ "$maxrange" = ""]; then
+if [ "$minrange" = "" ] || [ "$maxrange" = "" ]; then
     echo "Trying to infer ranges..."
     if [ ! -f "$local_target_dir"/analimits ]; then
         echo "Can't infer ranges, aborting!"
