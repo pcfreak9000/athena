@@ -10,6 +10,21 @@ if [ ! -d "$2" ]; then
     ./retrieve.sh "$1" "$2"
 fi
 
+if [ "$minrange" = "" ] || [ "$maxrange" = ""]; then
+    echo "Trying to infer ranges..."
+    if [ ! -f "$local_target_dir"/analimits ]; then
+        echo "Can't infer ranges, aborting!"
+        exit 1
+    fi
+    {
+        read -r minrange
+        read -r maxrange
+    } < "$local_target_dir"/analimits
+fi
+
+echo "Minrange: $minrange"
+echo "Maxrange: $maxrange"
+
 exshape () {
     vis/python/extract_shape.py "$local_target_dir"/tavg.athdf "$local_target_dir"/dshape"$1$2".csv "$spin" "$x3min" "$x3max" "$1" "$avgmdot" $2
 }
