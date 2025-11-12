@@ -28,7 +28,7 @@ function copy() {
         exit 1
     fi
 }
-
+copy "simout/master_project.prim.00000.athdf" "initial_conditions.athdf"
 copy "simout/master_project.hst" "hist.hst"
 copy "out.mp4" "out.mp4"
 copy "out_log.mp4" "out_log.mp4"
