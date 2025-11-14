@@ -34,6 +34,8 @@ def getTauFactor(kwargs):
 
 def timecomp(r,th,a):
     g_tt = (2*1.0*r/(a**2*math.cos(th)**2+r**2) - 1)
+    if g_tt >= 0.0:
+        return 0.0 #eeh...
     return math.sqrt(-1.0/g_tt)
 #(2*m*r/(a^2*cos(th)^2 + r^2) - 1)
 
