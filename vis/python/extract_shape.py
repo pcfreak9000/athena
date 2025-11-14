@@ -32,6 +32,11 @@ def getTauFactor(kwargs):
     mdotcode=kwargs['mdc']
     return 4.0*math.pi*mdottarget/(eta*mdotcode*modifier)
 
+def timecomp(r,th,a):
+    g_tt = (2*1.0*r/(a**2*math.cos(th)**2+r**2) - 1)
+    return math.sqrt(-1.0/g_tt)
+#(2*m*r/(a^2*cos(th)^2 + r^2) - 1)
+
 
 def getThetaTop(radiusInd, rho, rcoords, thcoords, thbord, a, tau_factor):
     tau = 0.0
@@ -99,7 +104,10 @@ def main(**kwargs):
                 xs.append(rcoords[rInd])
             ys.append(0.0)
             densities.append(0.0)
-            u0.append(0.0)
+            if rcoords[rInd] < horizon:
+                u0.append(0.0)
+            else:
+                u0.append(timecomp(rcoords[rInd],math.pi/2,a))
             u1.append(0.0)
             u2.append(0.0)
             u3.append(0.0)
