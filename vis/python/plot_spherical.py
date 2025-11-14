@@ -41,6 +41,7 @@ def main(**kwargs):
         matplotlib.use('agg')
     import matplotlib.pyplot as plt
     import matplotlib.colors as colors
+    from matplotlib.colors import BoundaryNorm, ListedColormap
 
     # Determine refinement level to use
     if kwargs['level'] is not None:
@@ -277,7 +278,16 @@ def main(**kwargs):
     if kwargs['abs'] is not None:
         vals = np.abs(vals)
     # Determine colormapping properties
-    cmap = plt.get_cmap(kwargs['colormap'])
+#    countlvls = 0
+#    lvlsun = [0]
+    if quantities[0] == 'Levels':
+        lvlsun = np.unique(data['Levels'])
+        countlvls = len(lvlsun)
+        base_cmap = plt.get_cmap(kwargs['colormap'])
+        colorsspace = base_cmap(np.linspace(0, 1, countlvls))
+        cmap = ListedColormap(colorsspace)
+    else:
+        cmap = plt.get_cmap(kwargs['colormap'])
     vmin = kwargs['vmin']
     vmax = kwargs['vmax']
     if kwargs['logc']:
@@ -318,7 +328,10 @@ def main(**kwargs):
         else:
             plt.xlabel(r'$x$')
             plt.ylabel(r'$z$')
-    plt.colorbar(im)
+    if quantities[0] == 'Levels':
+        plt.colorbar(im, ticks=lvlsun)
+    else:
+        plt.colorbar(im)
     if kwargs['output_file'] == 'show':
         plt.show()
     else:
