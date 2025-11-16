@@ -3,7 +3,7 @@
 binac_target_dir="$1" #name of directory
 local_target_dir="$2" #absolute path
 
-binac_work=$(ssh binac2 'echo $WORK')
+binac_work=$(ssh -p 2223 binac2 'echo $WORK')
 
 if [ -z "$binac_work" ]; then
     echo "something is wrong"
@@ -22,7 +22,7 @@ mkdir -p "$local_target_dir"
 
 
 function copy() {
-    scp binac2:"$binac_work"/"$binac_target_dir"/"$1" "$local_target_dir"/"$2"
+    scp -P 2223 binac2:"$binac_work"/"$binac_target_dir"/"$1" "$local_target_dir"/"$2"
     if [ $? -ne 0 ]; then
         if [ "$3" = "" ]; then
             echo "problem with scp"
