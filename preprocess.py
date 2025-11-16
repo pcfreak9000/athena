@@ -14,7 +14,7 @@ spin = 0.998
 r_edge = 12.0
 r_peak = 60.0
 
-betainp = 0.1
+betainp = 1.0
 
 #we leave it be in the initial conditions file. th_nocool = 10.0 #emulates th_nocool=0.1 with the weird cooling function which does not map the paper. but with this, the accretion disks make more sense
 mass = 1.0 #per recommendation, we leave this at 1
