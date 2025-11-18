@@ -24,6 +24,24 @@ eta = 0.06 #radiative
 #tau_factor = rho_code_cgs_simple
 tau_target = 1.0
 
+def jet_cutoff_theta(r,a):
+    horizon = 1.0 * (1.0 + math.sqrt(1.0 - (a/1.0)**2))
+    #halfwidth = 10
+    #inflection = 4
+    #y = r*math.cos(th)
+    #xofr = halfwidth * (1-math.exp(-0.5*((y+1)/inflection)**2))
+    #thetaofr = math.asin(xofr/r)
+    #return thetaofr
+    if r < 2*horizon:
+        return math.pi/3
+    if r < 3*horizon:
+        return math.pi/4
+    if r < 5*horizon:
+        return math.pi/5
+    if r < 30*horizon:
+        return math.pi/16
+    return math.pi/40
+
 def getTauFactor(kwargs):
     mdottarget=float(kwargs['mdt'])
     x3min=float(kwargs['x3min'])
@@ -55,7 +73,9 @@ def getThetaTop(radiusInd, rho, rcoords, thcoords, thbord, a, tau_factor):
         diff = math.sqrt(a*a*costh*costh + radius*radius) * dtheta
 
         effRho = rho[0, thetaInd, radiusInd]
-        if effRho <= 1.5e-5 * (radius**-1.5):
+        if effRho <= 1.0e-6 * (radius**-1.5):
+            effRho = 0
+        if thcoords[thetaInd] <= jet_cutoff_theta(radius,a):
             effRho = 0
         prevTau = tau
         tau += tau_factor * effRho * diff
