@@ -335,7 +335,10 @@ def main(**kwargs):
     if kwargs['output_file'] == 'show':
         plt.show()
     else:
-        plt.savefig(kwargs['output_file'], bbox_inches='tight')
+        if kwargs['dpi'] is not None:
+            plt.savefig(kwargs['output_file'], bbox_inches='tight', dpi=kwargs['dpi'])
+        else:
+            plt.savefig(kwargs['output_file'], bbox_inches='tight')
 
 
 # Execute main function
@@ -384,6 +387,7 @@ if __name__ == '__main__':
                         default=None,
                         help=('data value to correspond to colormap maximum; use '
                               '--vmax=<val> if <val> has negative sign'))
+    parser.add_argument('--dpi', type=float, default=None, help='dpi of output file')
     parser.add_argument('--logc',
                         action='store_true',
                         help='flag indicating data should be colormapped logarithmically')

@@ -62,14 +62,14 @@ exshape 0.01
 exshape 0.5 -v
 #plot tavg.athdf rho --logc and maybe additional pngs?
 echo "Generating additional plots..."
-vis/python/plot_spherical.py "$local_target_dir"/tavg.athdf rho --colormap=jet "$local_target_dir"/rho_tavg.png
-vis/python/plot_spherical.py "$local_target_dir"/tavg.athdf rho --colormap=jet --logc "$local_target_dir"/rho_tavg_log.png
-vis/python/plot_spherical.py "$local_target_dir"/tavg.athdf q1 --vmin=0.0 --vmax=12.0 --colormap=seismic --abs "$local_target_dir"/q1_tavg.png
-vis/python/plot_spherical.py "$local_target_dir"/tavg.athdf q2 --vmin=0.0 --vmax=12.0 --colormap=seismic --abs "$local_target_dir"/q2_tavg.png
+vis/python/plot_spherical.py "$local_target_dir"/tavg.athdf rho --colormap=jet --dpi=600 "$local_target_dir"/rho_tavg.png
+vis/python/plot_spherical.py "$local_target_dir"/tavg.athdf rho --colormap=jet --dpi=600 --logc "$local_target_dir"/rho_tavg_log.png
+vis/python/plot_spherical.py "$local_target_dir"/tavg.athdf q1 --vmin=0.0 --vmax=12.0 --dpi=600 --colormap=seismic --abs "$local_target_dir"/q1_tavg.png
+vis/python/plot_spherical.py "$local_target_dir"/tavg.athdf q2 --vmin=0.0 --vmax=12.0 --dpi=600 --colormap=seismic --abs "$local_target_dir"/q2_tavg.png
 vis/python/plot_spherical.py "$local_target_dir"/initial_conditions.athdf Levels --abs --colormap=tab10 "$local_target_dir"/levels.png
-vis/python/plot_spherical.py "$local_target_dir"/initial_conditions.athdf rho --colormap=jet --logc "$local_target_dir"/rho_initial_log.png
-vis/python/plot_spherical.py "$local_target_dir"/initial_conditions.athdf rho --colormap=jet "$local_target_dir"/rho_initial.png
+vis/python/plot_spherical.py "$local_target_dir"/initial_conditions.athdf rho --colormap=jet --dpi=600 --logc "$local_target_dir"/rho_initial_log.png
+vis/python/plot_spherical.py "$local_target_dir"/initial_conditions.athdf rho --colormap=jet --dpi=600 "$local_target_dir"/rho_initial.png
 cd "$local_target_dir"
-gnuplot -e "set terminal png size 1000,1000; set output 'plot_dshapes.png'; set xrange[0:$x1max]; set yrange[0:$x1max]; plot \"dshape0.3-v.csv\" with line, \"dshape0.2-v.csv\" with line, \"dshape0.1-v.csv\" with line, \"dshape0.02-v.csv\" with line, \"dshape0.01-v.csv\" with line, \"dshape0.5-v.csv\" with line;" 
-gnuplot -e "set terminal png size 1000,1000; set output 'plot_qf.png'; set xrange[0:30000]; set yrange[0:20]; plot \"savg.csv\" using 1:2, \"savg.csv\" using 1:3, \"savg.csv\" using 1:4;"
+gnuplot -e "set terminal png size 2048,2048; set output 'plot_dshapes.png'; set xrange[0:$x1max]; set yrange[0:$x1max]; plot \"dshape0.3-v.csv\" with line, \"dshape0.2-v.csv\" with line, \"dshape0.1-v.csv\" with line, \"dshape0.02-v.csv\" with line, \"dshape0.01-v.csv\" with line, \"dshape0.5-v.csv\" with line;" 
+gnuplot -e "set terminal png size 2048,2048; set output 'plot_qf.png'; set xrange[0:20000]; set yrange[0:20]; plot \"savg.csv\" using 1:2, \"savg.csv\" using 1:3, \"savg.csv\" using 1:4;"
 echo "Done."
