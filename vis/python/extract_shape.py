@@ -63,8 +63,9 @@ def getThetaTop(radiusInd, rho, rcoords, thcoords, thbord, a, tau_factor):
     thetaInd = 0
     prevTau = 0.0
     while tau < tau_target:
-        #if thcoords[thetaInd] > math.pi/2.0:
-        #    return -1, 0.0
+        if thcoords[thetaInd] > math.pi/2.0:
+            interpol = (math.pi/2.0 - thcoords[thetaInd-1])/(thcoords[thetaInd]-thcoords[thetaInd-1])
+            return -1, thetaInd, interpol
 
         dtheta = thbord[thetaInd + 1] - thbord[thetaInd]
         #Kerr-Schild coordinates -> ds^2=(a^2*cos^2(th)+r^2) dth^2
@@ -81,11 +82,10 @@ def getThetaTop(radiusInd, rho, rcoords, thcoords, thbord, a, tau_factor):
         tau += tau_factor * effRho * diff
 
         thetaInd += 1
-
-    interpol = (tau_target - prevTau) / (tau - prevTau)
     if thcoords[thetaInd] > math.pi/2.0:
         interpol = (math.pi/2.0 - thcoords[thetaInd-1])/(thcoords[thetaInd]-thcoords[thetaInd-1])
         return -1, thetaInd, interpol
+    interpol = (tau_target - prevTau) / (tau - prevTau)
     return 1, thetaInd, interpol
 
 def getFromBorderIndex(array, indexTauGrOne, interpol):
