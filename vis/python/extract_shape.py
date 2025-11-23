@@ -64,7 +64,8 @@ def getThetaTop(radiusInd, rho, rcoords, thcoords, thbord, a, tau_factor):
     prevTau = 0.0
     while tau < tau_target:
         if thcoords[thetaInd] > math.pi/2.0:
-            return -1, 0.0
+            interpol = (math.pi/2.0 - thcoords[thetaInd-1])/(thcoords[thetaInd]-thcoords[thetaInd-1])
+            return -1, thetaInd, interpol
 
         dtheta = thbord[thetaInd + 1] - thbord[thetaInd]
         #Kerr-Schild coordinates -> ds^2=(a^2*cos^2(th)+r^2) dth^2
@@ -81,11 +82,11 @@ def getThetaTop(radiusInd, rho, rcoords, thcoords, thbord, a, tau_factor):
         tau += tau_factor * effRho * diff
 
         thetaInd += 1
-
-    interpol = (tau_target - prevTau) / (tau - prevTau)
     if thcoords[thetaInd] > math.pi/2.0:
-        return -1, 0.0
-    return thetaInd, interpol
+        interpol = (math.pi/2.0 - thcoords[thetaInd-1])/(thcoords[thetaInd]-thcoords[thetaInd-1])
+        return -1, thetaInd, interpol
+    interpol = (tau_target - prevTau) / (tau - prevTau)
+    return 1, thetaInd, interpol
 
 def getFromBorderIndex(array, indexTauGrOne, interpol):
     if indexTauGrOne == 0:
@@ -116,23 +117,15 @@ def main(**kwargs):
     horizon = 1.0 * (1.0 + math.sqrt(1.0 - (a/1.0)**2))
     for rInd in range(0, rcoords.shape[0]):
         #print(len(rcoords))
-        thtop, interpol = getThetaTop(rInd, rho, rcoords, thcoords, thbord, a, tau_factor)
+        success, thtop, interpol = getThetaTop(rInd, rho, rcoords, thcoords, thbord, a, tau_factor)
         # interpol = 0.5
         # heights in geometric units
-        if thtop == -1:
+        if success == -1:
             if not kwargs['visualize']:
                 xs.append(math.sqrt(rcoords[rInd]**2 + a*a))
             else:
                 xs.append(rcoords[rInd])
             ys.append(0.0)
-            densities.append(0.0)
-            if rcoords[rInd] < horizon:
-                u0.append(0.0)
-            else:
-                u0.append(timecomp(rcoords[rInd],math.pi/2,a))
-            u1.append(0.0)
-            u2.append(0.0)
-            u3.append(0.0)
         else:
             if not kwargs['visualize']:
                 xs.append(math.sqrt(rcoords[rInd]**2 + a*a) * math.sin(getFromBorderIndex(thcoords, thtop, interpol)))
@@ -146,13 +139,13 @@ def main(**kwargs):
                 print("negative y should not occur at this place")
                 ytoappend = 0.0
             ys.append(ytoappend)
-            densities.append(getFromBorderIndex(rho[0, :, rInd], thtop, interpol))
-            u0.append(getFromBorderIndex(du0[0, :, rInd], thtop, interpol))
-            u1.append(getFromBorderIndex(du1[0, :, rInd], thtop, interpol))
-            u2.append(getFromBorderIndex(du2[0, :, rInd], thtop, interpol))
-            u3.append(getFromBorderIndex(du3[0, :, rInd], thtop, interpol))
+        densities.append(getFromBorderIndex(rho[0, :, rInd], thtop, interpol))
+        u0.append(getFromBorderIndex(du0[0, :, rInd], thtop, interpol))
+        u1.append(getFromBorderIndex(du1[0, :, rInd], thtop, interpol))
+        u2.append(getFromBorderIndex(du2[0, :, rInd], thtop, interpol))
+        u3.append(getFromBorderIndex(du3[0, :, rInd], thtop, interpol))
     #make sure the disk is closed towards the outer edge
-    xs.append(xs[-1]+0.5)
+    xs.append(xs[-1]+0.2)
     ys.append(0.0)
     densities.append(densities[-1])
     u0.append(u0[-1])
