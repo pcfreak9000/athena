@@ -7,21 +7,8 @@ import athena_read
 import math
 import csv
 
-#kappa = 0.4 #in cgs
-eta = 0.06 #radiative
-#mdottarget = 0.1
-#mdotcode = 0.039189*50
-#solar_mass_cgs = 1.988e33
-#bh_mass_cgs = 10*solar_mass_cgs
-#g_cgs = 6.674e-8 #grav. constant in cgs
-#c_cgs = 2.998e10 #speed of light in cgs
-#rho_code_cgs = 4*math.pi*c_cgs*c_cgs*mdottarget/(eta*mdotcode*g_cgs*bh_mass_cgs)
-#rho_code_cgs_simple = 4*math.pi*mdottarget/(eta*mdotcode)
 
-#print(rho_code_cgs)
-#print(rho_code_cgs_simple)
-
-#tau_factor = rho_code_cgs_simple
+eta = 0.06 #radiative efficiency
 tau_target = 1.0
 
 def jet_cutoff_theta(r,a):
@@ -82,6 +69,7 @@ def getThetaTop(radiusInd, rho, rcoords, thcoords, thbord, a, tau_factor):
         tau += tau_factor * effRho * diff
 
         thetaInd += 1
+
     if thcoords[thetaInd] > math.pi/2.0:
         interpol = (math.pi/2.0 - thcoords[thetaInd-1])/(thcoords[thetaInd]-thcoords[thetaInd-1])
         return -1, thetaInd, interpol
@@ -103,6 +91,7 @@ def main(**kwargs):
     rcoords = data['x1v']
     thcoords = data['x2v']
     thbord = data['x2f']
+    # the velocity is not in Kerr-Schild but in Boyer-Lindquist coordinates
     du0 = data['u0']
     du1 = data['u1']
     du2 = data['u2']
@@ -116,9 +105,7 @@ def main(**kwargs):
     u3 = [0.0]
     horizon = 1.0 * (1.0 + math.sqrt(1.0 - (a/1.0)**2))
     for rInd in range(0, rcoords.shape[0]):
-        #print(len(rcoords))
         success, thtop, interpol = getThetaTop(rInd, rho, rcoords, thcoords, thbord, a, tau_factor)
-        # interpol = 0.5
         # heights in geometric units
         if success == -1:
             if not kwargs['visualize']:
@@ -139,6 +126,8 @@ def main(**kwargs):
                 print("negative y should not occur at this place")
                 ytoappend = 0.0
             ys.append(ytoappend)
+        # if the data point is beyond the horizon it is not clear if the results still make sense. This might become relevant if the disk is extremely close to the horizon
+        # and therefore the raytracer has to interpolate between the valid data outside the horizon and the possibly invalid data right beyond the horizon
         densities.append(getFromBorderIndex(rho[0, :, rInd], thtop, interpol))
         u0.append(getFromBorderIndex(du0[0, :, rInd], thtop, interpol))
         u1.append(getFromBorderIndex(du1[0, :, rInd], thtop, interpol))
@@ -152,7 +141,6 @@ def main(**kwargs):
     u1.append(u1[-1])
     u2.append(u2[-1])
     u3.append(u3[-1])
-    #lis = [rcoords, heights, densities, u0, u1, u2, u3]
     lis = [xs, ys, densities, u0, u1, u2, u3]
     zl = zip(*lis)
     with open(output_filename, 'w', newline='') as csvfile:

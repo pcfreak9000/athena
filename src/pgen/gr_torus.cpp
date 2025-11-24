@@ -35,17 +35,18 @@
 #error "This problem generator must be used with general relativity"
 #endif
 
+//use thin disk initial conditions, not the default ones given by this problem generator
 #define THINDISK
 
+//These constants could potentially be added to the input file
 #define THETA0 0.001
 //this constant doesn't really have an influence, rho is renormalized anyways
 #define K_ENTROPY 0.1
-
 #define H_ASPECT 0.07
 
 #define M_PARAM 0.1
 
-
+//the floors on gas pressure and density should be chosen such that their K constant approximately matches this constant
 #define TARGET_Kc 0.00069
 
 
@@ -518,7 +519,7 @@ void MeshBlock::ProblemGenerator(ParameterInput *pin) {
 
           // Transform to preferred coordinates
           Real u0, u1, u2, u3;
-          //use u1_bl=0.0 here? or was that a bug which is fixed now?
+
           TransformContravariantFromBoyerLindquist(u0_bl, u1_bl, u2_bl, u3_bl, x1, x2, x3,
               &u0, &u1, &u2, &u3);
           uu1 = u1 - gi(I01,i) / gi(I00,i) * u0;
@@ -619,14 +620,11 @@ void MeshBlock::ProblemGenerator(ParameterInput *pin) {
         }
       }
     }
-//#ifndef POSTPROBLEMGENERATOR
     // Calculate cell-centered magnetic field
     pfield->CalculateCellCenteredField(pfield->b, pfield->bcc, pcoord, il, iu, jl, ju, kl,
                                        ku);
-//#endif
   }
 
-//#ifndef POSTPROBLEMGENERATOR
   // Initialize conserved values
   peos->PrimitiveToConserved(phydro->w, pfield->bcc, phydro->u, pcoord, il, iu, jl, ju,
       kl, ku);
