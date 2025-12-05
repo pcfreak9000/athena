@@ -114,6 +114,20 @@ def main(**kwargs):
                 xs.append(rcoords[rInd])
             ys.append(0.0)
         else:
+            # the first point closest to the horizon is actually part of a finitely (thin) surface. If a photon ends up between the horizon and this point interpolation with zeros would occur, which might be physically incorrect.
+            # instead we extend the accretion disk halfway to the horizon but with a thickness of zero. Photons ending up between this point and the horizon won't register a hit with the disk and on the other side the interpolation is fixed.
+            # still just an approximation, but a better one than the zero interpolation.
+            if rInd == 0:
+                if not kwargs['visualize']:
+                    xs.append(math.sqrt(((rcoords[rInd]+horizon)*0.5)**2 + a*a))
+                else:
+                    xs.append((rcoords[rInd]+horizon)*0.5)
+                ys.append(0.0)
+                densities.append(getFromBorderIndex(rho[0, :, rInd], thtop, interpol))
+                u0.append(getFromBorderIndex(du0[0, :, rInd], thtop, interpol))
+                u1.append(getFromBorderIndex(du1[0, :, rInd], thtop, interpol))
+                u2.append(getFromBorderIndex(du2[0, :, rInd], thtop, interpol))
+                u3.append(getFromBorderIndex(du3[0, :, rInd], thtop, interpol))
             if not kwargs['visualize']:
                 xs.append(math.sqrt(rcoords[rInd]**2 + a*a) * math.sin(getFromBorderIndex(thcoords, thtop, interpol)))
             else:
@@ -126,8 +140,6 @@ def main(**kwargs):
                 print("negative y should not occur at this place")
                 ytoappend = 0.0
             ys.append(ytoappend)
-        # if the data point is beyond the horizon it is not clear if the results still make sense. This might become relevant if the disk is extremely close to the horizon
-        # and therefore the raytracer has to interpolate between the valid data outside the horizon and the possibly invalid data right beyond the horizon
         densities.append(getFromBorderIndex(rho[0, :, rInd], thtop, interpol))
         u0.append(getFromBorderIndex(du0[0, :, rInd], thtop, interpol))
         u1.append(getFromBorderIndex(du1[0, :, rInd], thtop, interpol))
