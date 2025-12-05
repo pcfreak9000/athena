@@ -119,7 +119,7 @@ def main(**kwargs):
             # still just an approximation, but a better one than the zero interpolation.
             if rInd == 0:
                 if not kwargs['visualize']:
-                    xs.append(math.sqrt(((rcoords[rInd]+horizon)*0.5)**2 + a*a))
+                    xs.append(math.sqrt( ( (rcoords[rInd]+horizon) * 0.5 )**2 + a*a) * math.sin(getFromBorderIndex(thcoords, thtop, interpol)))
                 else:
                     xs.append((rcoords[rInd]+horizon)*0.5)
                 ys.append(0.0)
