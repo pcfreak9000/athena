@@ -8,7 +8,7 @@ import math
 import csv
 
 
-eta = 0.06 #radiative efficiency
+#eta = 0.06 #radiative efficiency
 tau_target = 1.0
 
 def jet_cutoff_theta(r,a):
@@ -35,6 +35,14 @@ def getTauFactor(kwargs):
     x3max=float(kwargs['x3max'])
     modifier=2.0*math.pi/(x3max-x3min)
     mdotcode=kwargs['mdc']
+    spin=kwargs['a']
+    z1=1.0 + (1.0 - spin**2)**(1.0/3.0) * ((1.0 + spin)**(1.0/3.0) + (1.0 - spin)**(1.0/3.0));
+    z2=(3.0 * spin**2 + z1**2)**0.5;
+    zz=((3.0 - z1) * (3.0 + z1 + 2.0 * z2))**0.5;
+    isco=3.0+z2-zz
+    energ=((isco**1.5)-2*(isco**0.5)+spin)/((isco**0.75)*(isco**1.5-3*isco**0.5+2*spin)**0.5)
+    eta=1.0-energ
+    #print("Using eta="+str(eta))
     return 4.0*math.pi*mdottarget/(eta*mdotcode*modifier)
 
 def timecomp(r,th,a):
