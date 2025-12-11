@@ -89,7 +89,7 @@ class MeshBlock {
   friend class ChemRadIntegrator;
   friend class IMRadTaskList;
 #ifdef HDF5OUTPUT
-  friend class ATHDF5Output;
+  template <typename T> friend class ATHDF5Output;
 #endif
 
  public:
@@ -244,7 +244,7 @@ class Mesh {
   friend class OrbitalAdvection;
   friend class Particles;
 #ifdef HDF5OUTPUT
-  friend class ATHDF5Output;
+  template <typename T> friend class ATHDF5Output;
 #endif
 
  public:
