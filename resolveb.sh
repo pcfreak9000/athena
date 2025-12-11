@@ -25,10 +25,11 @@ echo "X3max: $x3max"
 echo "Avg mdot_code: $avgmdot"
 #calculate surface shape
 echo "Constructing shape(s)..."
-exshape 0.5
-exshape 0.3
-exshape 0.2
+#exshape 0.5
+#exshape 0.3
+#exshape 0.2
 exshape 0.1
-exshape 0.02
-exshape 0.01
+exshape 0.05
+#exshape 0.02
+#exshape 0.01
 echo "Done."
