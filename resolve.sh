@@ -61,6 +61,7 @@ exshape 0.01 -v
 exshape 0.01
 exshape 0.5 -v
 exshape 0.05 -v
+exshape 0.05
 #plot tavg.athdf rho --logc and maybe additional pngs?
 echo "Generating additional plots..."
 vis/python/plot_spherical.py "$local_target_dir"/tavg.athdf rho --colormap=jet --dpi=600 "$local_target_dir"/rho_tavg.png
