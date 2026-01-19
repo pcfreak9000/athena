@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --mail-type=ALL 
+
 
 
 #echo $WORKDIR
