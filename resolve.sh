@@ -42,6 +42,8 @@ spin=$(grep -E '^\s*a\s*=' "$local_target_dir"/athinput | awk -F'=' '{print $2}'
 x3min=$(grep -m1 -E '^\s*x3min\s*=' "$local_target_dir"/athinput | awk -F'=' '{print $2}' | awk '{print $1}')
 x3max=$(grep -m1 -E '^\s*x3max\s*=' "$local_target_dir"/athinput | awk -F'=' '{print $2}' | awk '{print $1}')
 x1max=$(grep -m1 -E '^\s*x1max\s*=' "$local_target_dir"/athinput | awk -F'=' '{print $2}' | awk '{print $1}')
+tlim=$(grep -m1 -E '^\s*tlim\s*=' "$local_target_dir"/athinput | awk -F'=' '{print $2}' | awk '{print $1}')
+echo "tlim: $tlim"
 echo "Spin: $spin"
 echo "X1max: $x1max"
 echo "X3min: $x3min"
@@ -72,6 +74,8 @@ vis/python/plot_spherical.py "$local_target_dir"/initial_conditions.athdf Levels
 vis/python/plot_spherical.py "$local_target_dir"/initial_conditions.athdf rho --colormap=jet --dpi=600 --logc "$local_target_dir"/rho_initial_log.png
 vis/python/plot_spherical.py "$local_target_dir"/initial_conditions.athdf rho --colormap=jet --dpi=600 "$local_target_dir"/rho_initial.png
 cd "$local_target_dir"
-gnuplot -e "set terminal png size 1024,1024; set output 'plot_dshapes.png'; set xrange[0:$x1max]; set yrange[0:$x1max]; plot \"dshape0.3-v.csv\" with line, \"dshape0.2-v.csv\" with line, \"dshape0.1-v.csv\" with line, \"dshape0.02-v.csv\" with line, \"dshape0.01-v.csv\" with line, \"dshape0.5-v.csv\" with line, \"dshape0.05-v.csv\" with line;" 
-gnuplot -e "set terminal png size 1024,1024; set output 'plot_qf.png'; set xrange[0:20000]; set yrange[0:20]; plot \"savg.csv\" using 1:2, \"savg.csv\" using 1:3, \"savg.csv\" using 1:4;"
+gnuplot -e "set terminal png size 1024,1024; set output 'plot_dshapes.png'; set xrange[0:$x1max]; set yrange[0:$x1max]; plot \"dshape0.01-v.csv\" with line, \"dshape0.02-v.csv\" with line, \"dshape0.05-v.csv\" with line, \"dshape0.1-v.csv\" with line, \"dshape0.2-v.csv\" with line, \"dshape0.3-v.csv\" with line, \"dshape0.5-v.csv\" with line;" 
+gnuplot -e "set terminal png size 1024,1024; set output 'plot_qf.png'; set xrange[0:$tlim]; set yrange[0:20]; plot \"savg.csv\" using 1:2, \"savg.csv\" using 1:3, \"savg.csv\" using 1:4;"
+gnuplot -e "set terminal png size 1024,1024; set output 'plot_hist_mdot.png'; set xrange[0:$tlim]; set logscale y; plot \"hist.hst\" using 1:14, \"hist.hst\" using 1:18, \"hist.hst\" using 1:22, \"hist.hst\" using 1:26;"
+gnuplot "$HOME"/Git/athena/testgp
 echo "Done."
