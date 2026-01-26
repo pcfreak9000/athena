@@ -37,11 +37,11 @@ set terminal png size 1024,1024
 set output "moving_average.png"
 set logscale y
 set xrange[0:21000]
-plot "hist.hst" using 1:14 notitle, \
-     "hist.hst" using 1:18 notitle, \
-     "hist.hst" using 1:22 notitle, \
-     "hist.hst" using 1:26 notitle, \
-     "hist.hst" using ($1-n/2):(avg_n($14)) w l lw 2, \
-     "hist.hst" using ($1-n/2):(avg_n($18)) w l lw 2, \
-     "hist.hst" using ($1-n/2):(avg_n($22)) w l lw 2, \
-     "hist.hst" using ($1-n/2):(avg_n($26)) w l lw 2 
+plot "hist.hst" using 1:14 notitle lc rgb "#BBFF0000", \
+     "hist.hst" using 1:18 notitle lc rgb "#BB00FFFF", \
+     "hist.hst" using 1:22 notitle lc rgb "#BB0000FF", \
+     "hist.hst" using 1:26 notitle lc rgb "#BBFF00FF", \
+     "hist.hst" using ($1-n/2):(avg_n($14)) w l lw 2 lc rgb "#00FF0000" title "Horizon", \
+     "hist.hst" using ($1-n/2):(avg_n($18)) w l lw 2 lc rgb "#0000FFFF" title "r=5", \
+     "hist.hst" using ($1-n/2):(avg_n($22)) w l lw 2 lc rgb "#000000FF" title "r=6", \
+     "hist.hst" using ($1-n/2):(avg_n($26)) w l lw 2 lc rgb "#00FF00FF" title "r=12" 
