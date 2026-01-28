@@ -7,13 +7,15 @@ import math
 import csv
 import multiprocessing
 
-def integrate_flow(rho, velr, thcoords, thbord, radius, a):
+def integrate_flow(rho, velr, thcoords, thbord, radius, a, phicoords, phibord):
     flow = 0.0
-    for thetaInd in range(len(thcoords)):
-        dtheta = thbord[thetaInd + 1] - thbord[thetaInd]
-        costh = math.cos(thcoords[thetaInd])
-        dS = (radius*radius + a*a*costh*costh) * math.sin(thcoords[thetaInd]) * dtheta
-        flow += 2 * math.pi * rho[0, thetaInd, 0] * velr[0, thetaInd, 0] * dS
+    for phiInd in range(len(phicoords)):
+        dphi = phibord[phiInd + 1] - phibord[phiInd]
+        for thetaInd in range(len(thcoords)):
+            dtheta = thbord[thetaInd + 1] - thbord[thetaInd]
+            costh = math.cos(thcoords[thetaInd])
+            dS = (radius*radius + a*a*costh*costh) * math.sin(thcoords[thetaInd]) * dtheta
+            flow += dphi * rho[0, thetaInd, 0] * velr[0, thetaInd, 0] * dS
     return flow
 
 def eval(input_filename):    
@@ -23,8 +25,10 @@ def eval(input_filename):
     velr = data['vel1']
     thcoords = data['x2v']
     thbord = data['x2f']
+    phicoords = data['x3v']
+    phibord = data['x3f']
     rcoords = data['x1v']
-    flow = integrate_flow(rho, velr, thcoords, thbord, rcoords[0], a)
+    flow = integrate_flow(rho, velr, thcoords, thbord, rcoords[0], a, phicoords, phibord)
     print(input_filename[0])
     return (data['Time'], flow)
      
