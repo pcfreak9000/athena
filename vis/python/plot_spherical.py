@@ -323,15 +323,17 @@ def main(**kwargs):
             plt.ylabel(r'$\log_{10}(r)\ z / r$')
     else:
         if kwargs['midplane']:
-            plt.xlabel(r'$x$')
-            plt.ylabel(r'$y$')
+            plt.xlabel(r'$x$ [a.u.]')
+            plt.ylabel(r'$y$ [a.u.]')
         else:
-            plt.xlabel(r'$x$')
-            plt.ylabel(r'$z$')
+            plt.xlabel(r'$x$ [a.u.]')
+            plt.ylabel(r'$z$ [a.u.]')
     if quantities[0] == 'Levels':
-        plt.colorbar(im, ticks=lvlsun)
+        colorbar = plt.colorbar(im, ticks=lvlsun)
+        colorbar.set_label("levels")
     else:
-        plt.colorbar(im)
+        colorbar = plt.colorbar(im)
+        colorbar.set_label(quantities[0]+" [a.u.]")
     if kwargs['output_file'] == 'show':
         plt.show()
     else:

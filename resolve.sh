@@ -68,6 +68,7 @@ exshape 0.05
 echo "Generating additional plots..."
 vis/python/plot_spherical.py "$local_target_dir"/tavg.athdf rho --colormap=jet --dpi=600 "$local_target_dir"/rho_tavg.png
 vis/python/plot_spherical.py "$local_target_dir"/tavg.athdf rho --colormap=jet --dpi=600 --logc "$local_target_dir"/rho_tavg_log.png
+vis/python/plot_spherical.py "$local_target_dir"/tavg.athdf rho --colormap=jet --dpi=600 --logc --r=12.0 "$local_target_dir"/rho_tavg_ii_log.png
 vis/python/plot_spherical.py "$local_target_dir"/tavg.athdf q1 --vmin=0.0 --vmax=12.0 --dpi=600 --colormap=seismic --abs "$local_target_dir"/q1_tavg.png
 vis/python/plot_spherical.py "$local_target_dir"/tavg.athdf q2 --vmin=0.0 --vmax=12.0 --dpi=600 --colormap=seismic --abs "$local_target_dir"/q2_tavg.png
 vis/python/plot_spherical.py "$local_target_dir"/initial_conditions.athdf Levels --abs --colormap=tab10 "$local_target_dir"/levels.png
